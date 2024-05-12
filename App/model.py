@@ -46,6 +46,13 @@ from DISClib.Algorithms.Sorting import insertionsort as ins
 from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
+from datetime import datetime as dt
+import folium
+import webbrowser
+import sys
+import time
+import math
+from haversine import haversine, unit
 assert cf
 
 """
@@ -62,7 +69,25 @@ def new_data_structs():
     manera vacía para posteriormente almacenar la información.
     """
     #TODO: Inicializar las estructuras de datos
-    pass
+    try: 
+        control = {
+            "aeropuertos": None,
+            "vuelos": None,
+            "costos": None
+        }
+    
+        control["vuelos"] = m.newMap(numelements=3020,
+                                     maptype='PROBING',
+                                     cmpfunction=compararorigen)
+
+        control["aeropuertos"] = gr.newGraph(datastructure="ADJ_LIST",
+                                             directed=True,
+                                             size=428,
+                                             cmpfunction=compararAeropuertos)
+
+        return control
+    except Exception as exp:
+        error.reraise(exp, 'model:new_data_structs')
 
 
 # Funciones para agregar informacion al modelo
@@ -84,8 +109,95 @@ def new_data(id, info):
     #TODO: Crear la función para estructurar los datos
     pass
 
+def addAeropuertoConnection(control, ultimovuelo, vuelo):
+    try:
+        origen = formatVertex(ultimovuelo)
+        destino = formatVertex(vuelo)
+        int(distancialimpia(ultimovuelo, origen))
+        distancia = 0
+        distancia = abs(distancia)
+        addAeropuerto(control, origen)
+        addAeropuerto(control, destino)
+        addConeccion(control, origen, destino, distancia)
+        return control
+    except Exception as exp:
+        error.reraise(exp, 'model:addAeropuertoConnection')
+
+def addAeropuerto(control, name):
+    try: 
+        if not gr.containsVertex(control["aeropuertos"], name):
+            gr.insertVertex(control["aeropuertos"], name)
+        return control
+    except Exception as exp:
+        error.reraise(exp, 'model:addAeropuerto')
+
+def formatVertex(vuelo):
+    name = vuelo["ICAO"].lower()
+    return name
+
+def distancialimpia(ultimovuelo, vuelo):
+    if vuelo['TIEMPO_VUELO'] == '':
+        vuelo['TIEMPO_VUELO'] = 0
+    if ultimovuelo['TIEMPO_VUELO'] == '':
+        ultimovuelo['TIEMPO_VUELO'] = 0
+
+def distanciakm(control):
+    ultimovuelo["ORIGEN"]
+    vuelo["ORIGEN"]
+    ultimovuelo["DESTINO"]
+    vuelo["DESTINO"]
+        
+    for i in lt.iterator(control):
+        if ultimovuelo["ORIGEN"] == i["ICAO"]:
+            longi = i["LONGITUD"]
+            lati = I["LATITUD"]
+            var1 = (lati, longi)
+            if ultimovuelo["DESTINO"] == i["ICAO"]:
+                longi2 = i["LONGITUD"]
+                lati2 = I["LATITUD"]
+                var2 = (lati2, longi2)
+        if vuelo["ORIGEN"] == i["ICAO"]:
+            longi = i["LONGITUD"]
+            lati = I["LATITUD"]
+            var1 = (lati, longi)
+            if vuelo["DESTINO"] == i["ICAO"]:
+                longi2 = i["LONGITUD"]
+                lati2 = I["LATITUD"]
+                var2 = (lati2, longi2)
+
+    return haversine(var1, var2, unit=Unit.KILOMETERS)      
+
+
+"""
+def haversine(lat1, lon1, lat2, lon2):
+     
+    # distance between latitudes
+    # and longitudes
+    dLat = (lat2 - lat1) * math.pi / 180.0
+    dLon = (lon2 - lon1) * math.pi / 180.0
+ 
+    # convert to radians
+    lat1 = (lat1) * math.pi / 180.0
+    lat2 = (lat2) * math.pi / 180.0
+ 
+    # apply formulae
+    a = (pow(math.sin(dLat / 2), 2) +
+         pow(math.sin(dLon / 2), 2) *
+             math.cos(lat1) * math.cos(lat2));
+    rad = 6371
+    c = 2 * math.asin(math.sqrt(a))
+    return rad * c
+"""
 
 # Funciones de consulta
+
+
+def addConeccion(control, origen, destino, distancia):
+    edge = gr.getEdge(control["aeropuertos"], origen, destino)
+    if edge is None:
+        gr.addEdge(analyzer["aeropuertos"], origen, destino, distancia)
+    return control
+
 
 def get_data(data_structs, id):
     """
@@ -159,12 +271,27 @@ def req_7(data_structs):
     pass
 
 
-def req_8(data_structs):
+def req_8(lst):
     """
     Función que soluciona el requerimiento 8
     """
     # TODO: Realizar el requerimiento 8
-    pass
+    start_time = get_time()
+    mapa = folium.Map(location=[0,0], zoom_start=2)
+
+    for i in lt.iterator(lst):
+        longi = i["LONGITUD"]
+        lati= i["LATITUD"]
+
+        loca = (lati, longi)
+        folium.Marker(location=loca, 
+                        popup=f"<b>{i['NOMBRE']}</b><br>Ciudad: {i['CIUDAD']}").add_to(mapa)
+
+    mapa.save("mapa.html")
+    webbrowser.open("mapa.html")
+    end_time = get_time()
+    deltaTime = delta_time(start_time, end_time)
+    return deltaTime
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
