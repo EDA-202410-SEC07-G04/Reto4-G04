@@ -111,22 +111,30 @@ def new_data(id, info):
     """
     #TODO: Crear la función para estructurar los datos
     pass
+def load_flights():
+    pass
+
 
 def addAeropuertoConnection(control, ultimovuelo, vuelo, tipo):
     try:
         origen = formatVertex(ultimovuelo)
         destino = formatVertex(vuelo)
         int(distancialimpia(ultimovuelo, origen))
-        if tipo == 1:
-            distancia = int(distanciakm(control, ultimovuelo, vuelo))
-        else:
-            distancia = int(distancia["TIEMPO_VUELO"])
+        distancia = control["vuelos"]
+        llave = str(origen) + "-" + str(destino)
+        distancia = mp.get(distancia, llave)
+        distancia = distancia["TIEMPO_VUELO"]
         addAeropuerto(control, origen)
         addAeropuerto(control, destino)
         addConeccion(control, origen, destino, distancia)
         return control
     except Exception as exp:
         error.reraise(exp, 'model:addAeropuertoConnection')
+        
+def crearmapa(control, icaoida, icaodevuelta, elemento):
+    llave = str(icaoida) + "-" + str(icaodevuelta)
+    mp.put(control["vuelos"], llave, elemento)
+    return control 
 
 def addAeropuerto(control, name):
     try: 
@@ -137,7 +145,7 @@ def addAeropuerto(control, name):
         error.reraise(exp, 'model:addAeropuerto')
 
 def formatVertex(vuelo):
-    name = vuelo["ICAO"].lower()
+    name = vuelo["ICAO"]
     return name
 
 def distancialimpia(ultimovuelo, vuelo):

@@ -28,6 +28,7 @@ from DISClib.ADT import stack as st
 from DISClib.ADT import queue as qu
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
+from DISClib.ADT import graph as gr
 assert cf
 from tabulate import tabulate
 import traceback
@@ -68,7 +69,8 @@ def load_data(control, tipo):
     """
     #TODO: Realizar la carga de datos
     controller.load_data(control, tipo)
-    
+    vertices = gr.numVertices(control["aeropuertos"])
+    print(vertices)
 
 
 def print_data(control, id):
