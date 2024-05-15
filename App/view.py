@@ -62,12 +62,13 @@ def print_menu():
     print("0- Salir")
 
 
-def load_data(control):
+def load_data(control, tipo):
     """
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    pass
+    controller.load_data(control, tipo)
+    
 
 
 def print_data(control, id):
@@ -155,8 +156,9 @@ if __name__ == "__main__":
         print_menu()
         inputs = input('Seleccione una opción para continuar\n')
         if int(inputs) == 1:
+            tipo = int(input("Distancia (1) o tiempo (2)"))
             print("Cargando información de los archivos ....\n")
-            data = load_data(control)
+            data = load_data(control, tipo)
         elif int(inputs) == 2:
             print_req_1(control)
 

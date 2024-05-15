@@ -46,13 +46,14 @@ from DISClib.Algorithms.Sorting import insertionsort as ins
 from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
+from DISClib.Utils import error as error
 from datetime import datetime as dt
 import folium
 import webbrowser
 import sys
 import time
 import math
-from haversine import haversine, unit
+from haversine import haversine, Unit
 assert cf
 
 """
@@ -62,6 +63,8 @@ dos listas, una para los videos, otra para las categorias de los mismos.
 
 # Construccion de modelos
 
+
+#ALGORITMO PRIM(EAGER) MAS EFICIENTE 
 
 def new_data_structs():
     """
@@ -76,7 +79,7 @@ def new_data_structs():
             "costos": None
         }
     
-        control["vuelos"] = m.newMap(numelements=3020,
+        control["vuelos"] = mp.newMap(numelements=3020,
                                      maptype='PROBING',
                                      cmpfunction=compararorigen)
 
@@ -109,13 +112,15 @@ def new_data(id, info):
     #TODO: Crear la función para estructurar los datos
     pass
 
-def addAeropuertoConnection(control, ultimovuelo, vuelo):
+def addAeropuertoConnection(control, ultimovuelo, vuelo, tipo):
     try:
         origen = formatVertex(ultimovuelo)
         destino = formatVertex(vuelo)
         int(distancialimpia(ultimovuelo, origen))
-        distancia = 0
-        distancia = abs(distancia)
+        if tipo == 1:
+            distancia = int(distanciakm(control, ultimovuelo, vuelo))
+        else:
+            distancia = int(distancia["TIEMPO_VUELO"])
         addAeropuerto(control, origen)
         addAeropuerto(control, destino)
         addConeccion(control, origen, destino, distancia)
@@ -325,4 +330,10 @@ def sort(data_structs):
     Función encargada de ordenar la lista con los datos
     """
     #TODO: Crear función de ordenamiento
+    pass
+
+def compararorigen():
+    pass
+
+def compararAeropuertos(): 
     pass

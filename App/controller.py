@@ -42,12 +42,45 @@ def new_controller():
 
 # Funciones para la carga de datos
 
-def load_data(control, filename):
+def load_data(control, tipo):
     """
     Carga los datos del reto
     """
     # TODO: Realizar la carga de datos
-    pass
+    load_airports(control, tipo)
+    load_flights(control, tipo)
+
+def load_airports(control, tipo):
+    servicesfile = cf.data_dir + "airports-2022.csv"
+    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
+                                delimiter=",")
+    lastservice = None
+    for service in input_file:
+        if lastservice is not None:
+            sameservice = lastservice['ServiceNo'] == service['ServiceNo']
+            samedirection = lastservice['Direction'] == service['Direction']
+            samebusStop = lastservice['BusStopCode'] == service['BusStopCode']
+            if sameservice and samedirection and not samebusStop:
+                model.addAeropuertoConnection(analyzer, lastservice, service, tipo)
+        lastservice = service
+    model.addRouteConnections(analyzer)
+    return analyzer
+
+def load_flights(control, tipo):
+    servicesfile = cf.data_dir + "flights-2022.csv"
+    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
+                                delimiter=",")
+    lastservice = None
+    for service in input_file:
+        if lastservice is not None:
+            sameservice = lastservice['ServiceNo'] == service['ServiceNo']
+            samedirection = lastservice['Direction'] == service['Direction']
+            samebusStop = lastservice['BusStopCode'] == service['BusStopCode']
+            if sameservice and samedirection and not samebusStop:
+                model.addStopConnection(analyzer, lastservice, service)
+        lastservice = service
+    model.addRouteConnections(analyzer)
+    return analyzer
 
 
 # Funciones de ordenamiento
