@@ -63,12 +63,15 @@ def print_menu():
     print("0- Salir")
 
 
-def load_data(control, tipo):
+def load_data(control):
     """
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    controller.load_data(control, tipo)
+    controller.load_data(control)
+    espe = mp.get(control["vuelos"], "SKMD-SKVP")
+    #print(control["vuelos"])
+    #print(espe)
     vertices = gr.numVertices(control["aeropuertos"])
     print(vertices)
 
@@ -158,9 +161,8 @@ if __name__ == "__main__":
         print_menu()
         inputs = input('Seleccione una opción para continuar\n')
         if int(inputs) == 1:
-            tipo = int(input("Distancia (1) o tiempo (2)"))
             print("Cargando información de los archivos ....\n")
-            data = load_data(control, tipo)
+            data = load_data(control)
         elif int(inputs) == 2:
             print_req_1(control)
 

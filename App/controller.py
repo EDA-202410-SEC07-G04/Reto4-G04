@@ -42,39 +42,40 @@ def new_controller():
 
 # Funciones para la carga de datos
 
-def load_data(control, tipo):
+def load_data(control):
     """
     Carga los datos del reto
     """
     # TODO: Realizar la carga de datos
-    load_airports(control, tipo)
-    load_flights(control, tipo)
+    load_flights(control)
+    load_airports(control)
 
-def load_airports(control, tipo):
+def load_airports(control):
     servicesfile = cf.data_dir + "airports-2022.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=";")
     lastservice = None
     for service in input_file:
         if lastservice is not None:
+            #print(lastservice['ICAO'])
             sameservice = lastservice['ICAO'] == service['ICAO']
             samedirection = lastservice['CIUDAD'] == service['CIUDAD']
             samebusStop = lastservice['PAIS'] == service['PAIS']
-            if sameservice and samedirection and not samebusStop:
-                model.addAeropuertoConnection(analyzer, lastservice, service, tipo)
+            model.addAeropuertoConnection(control, lastservice, service)
         lastservice = service
     #model.addRouteConnections(analyzer)
     return control
 
-def load_flights(control, tipo):
+def load_flights(control):
     servicesfile = cf.data_dir + "fligths-2022.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=";")
     for flight in input_file:
         sameservice = flight['ORIGEN']
         sameservice2 = flight['DESTINO']
+        #print(sameservice, sameservice2)
         elemento = flight
-    model.crearmapa(control, sameservice, sameservice2, elemento) 
+        model.crearmapa(control, sameservice, sameservice2, elemento) 
     return control
 
 

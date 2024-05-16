@@ -115,15 +115,26 @@ def load_flights():
     pass
 
 
-def addAeropuertoConnection(control, ultimovuelo, vuelo, tipo):
+def addAeropuertoConnection(control, ultimovuelo, vuelo):
     try:
         origen = formatVertex(ultimovuelo)
         destino = formatVertex(vuelo)
-        int(distancialimpia(ultimovuelo, origen))
-        distancia = control["vuelos"]
+        #int(distancialimpia(ultimovuelo, origen))
         llave = str(origen) + "-" + str(destino)
-        distancia = mp.get(distancia, llave)
-        distancia = distancia["TIEMPO_VUELO"]
+        #print(llave)
+        #print(control["vuelos"])
+        espe = mp.get(control["vuelos"], "BIKF-CYHM")
+        #print(espe)
+        #BIKF-CYHM llave
+        #BIKF-SKCL 
+        var1 = mp.get(control["vuelos"], llave)
+        #print(var1)
+        
+        if var1 == None: 
+            distancia = 0
+        else:
+            distancia = var1["value"]["TIEMPO_VUELO"]
+            #print(distancia)
         addAeropuerto(control, origen)
         addAeropuerto(control, destino)
         addConeccion(control, origen, destino, distancia)
@@ -132,13 +143,18 @@ def addAeropuertoConnection(control, ultimovuelo, vuelo, tipo):
         error.reraise(exp, 'model:addAeropuertoConnection')
         
 def crearmapa(control, icaoida, icaodevuelta, elemento):
-    llave = str(icaoida) + "-" + str(icaodevuelta)
-    mp.put(control["vuelos"], llave, elemento)
-    return control 
+    try:
+        llave = str(icaoida) + "-" + str(icaodevuelta)
+        #print(llave)
+        if not mp.contains(control["vuelos"], llave):
+            mp.put(control["vuelos"], llave, elemento)
+        return control
+    except Exception as exp:
+        error.reraise(exp, 'model:crearmapa') 
 
 def addAeropuerto(control, name):
     try: 
-        if not gr.containsVertex(control["aeropuertos"], name):
+        if gr.containsVertex(control["aeropuertos"], name) is False:
             gr.insertVertex(control["aeropuertos"], name)
         return control
     except Exception as exp:
@@ -208,7 +224,7 @@ def haversine(lat1, lon1, lat2, lon2):
 def addConeccion(control, origen, destino, distancia):
     edge = gr.getEdge(control["aeropuertos"], origen, destino)
     if edge is None:
-        gr.addEdge(analyzer["aeropuertos"], origen, destino, distancia)
+        gr.addEdge(control["aeropuertos"], origen, destino, distancia)
     return control
 
 
@@ -340,8 +356,21 @@ def sort(data_structs):
     #TODO: Crear función de ordenamiento
     pass
 
-def compararorigen():
-    pass
+def compararorigen(date1, date2):
+    #print(date1, date2)
+    date2 = date2["key"]
+    if (date1 == date2):
+        return 0
+    elif (date1 > date2):
+        return 1
+    else:
+        return -1
 
-def compararAeropuertos(): 
-    pass
+def compararAeropuertos(date1, date2): 
+    date2 = date2["key"]
+    if (date1 == date2):
+        return 0
+    elif (date1 > date2):
+        return 1
+    else:
+        return -1
