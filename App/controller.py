@@ -49,6 +49,8 @@ def load_data(control):
     # TODO: Realizar la carga de datos
     load_flights(control)
     load_airports(control)
+    model.addAeropuertoConnection(control)
+    
 
 def load_airports(control):
     servicesfile = cf.data_dir + "airports-2022.csv"
@@ -56,12 +58,14 @@ def load_airports(control):
                                 delimiter=";")
     lastservice = None
     for service in input_file:
+        model.crearmapadistancia(control, service) 
+        model.add_data(control, service)
         if lastservice is not None:
             #print(lastservice['ICAO'])
             sameservice = lastservice['ICAO'] == service['ICAO']
             samedirection = lastservice['CIUDAD'] == service['CIUDAD']
             samebusStop = lastservice['PAIS'] == service['PAIS']
-            model.addAeropuertoConnection(control, lastservice, service)
+            
         lastservice = service
     #model.addRouteConnections(analyzer)
     return control

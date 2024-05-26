@@ -70,10 +70,21 @@ def load_data(control):
     #TODO: Realizar la carga de datos
     controller.load_data(control)
     espe = mp.get(control["vuelos"], "SKMD-SKVP")
-    #print(control["vuelos"])
+    #print(control["aeropuertos"])
+    cr7 = gr.numEdges(control["aeropuertos"])
+    print(cr7)
+    #print(mp.size(control["vuelos"]))
+    #print(mp.get(control["vuelos"], "BIKF-SKCL"))
     #print(espe)
     vertices = gr.numVertices(control["aeropuertos"])
-    print(vertices)
+    m10 = gr.getEdge(control["aeropuertos"], "BIKF", "SKCL")
+    m11 = gr.getEdge(control["aeropuertosHaversine"], "BIKF", "SKCL")
+    
+    print(m10)
+    print(m11)
+    #print(mp.keySet(control["mapadistancias"]))
+    #print(mp.get(control["mapadistancias"], "MYAM"))
+    #print(vertices)
 
 
 def print_data(control, id):
@@ -155,6 +166,8 @@ if __name__ == "__main__":
     """
     Menu principal
     """
+    default_limit = 2000
+    sys.setrecursionlimit(default_limit*10)
     working = True
     #ciclo del menu
     while working:

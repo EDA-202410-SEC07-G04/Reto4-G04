@@ -76,10 +76,16 @@ def new_data_structs():
         control = {
             "aeropuertos": None,
             "vuelos": None,
-            "costos": None
+            "costos": None,
+            "listaAeropuertos": None,
+            "aeropuertosHaversine": None
         }
     
         control["vuelos"] = mp.newMap(numelements=3020,
+                                     maptype='PROBING',
+                                     cmpfunction=compararorigen)
+        
+        control["mapadistancias"] = mp.newMap(numelements=428,
                                      maptype='PROBING',
                                      cmpfunction=compararorigen)
 
@@ -87,6 +93,13 @@ def new_data_structs():
                                              directed=True,
                                              size=428,
                                              cmpfunction=compararAeropuertos)
+
+        control["aeropuertosHaversine"] = gr.newGraph(datastructure="ADJ_LIST",
+                                             directed=True,
+                                             size=428,
+                                             cmpfunction=compararAeropuertos)
+
+        control["listaAeropuertos"] = lt.newList("ARRAY_LIST")
 
         return control
     except Exception as exp:
@@ -100,7 +113,8 @@ def add_data(data_structs, data):
     Función para agregar nuevos elementos a la lista
     """
     #TODO: Crear la función para agregar elementos a una lista
-    pass
+    lt.addLast(data_structs["listaAeropuertos"], data)
+    return data_structs
 
 
 # Funciones para creacion de datos
@@ -111,36 +125,73 @@ def new_data(id, info):
     """
     #TODO: Crear la función para estructurar los datos
     pass
+
 def load_flights():
     pass
 
 
-def addAeropuertoConnection(control, ultimovuelo, vuelo):
-    try:
-        origen = formatVertex(ultimovuelo)
-        destino = formatVertex(vuelo)
-        #int(distancialimpia(ultimovuelo, origen))
-        llave = str(origen) + "-" + str(destino)
-        #print(llave)
-        #print(control["vuelos"])
-        espe = mp.get(control["vuelos"], "BIKF-CYHM")
-        #print(espe)
-        #BIKF-CYHM llave
-        #BIKF-SKCL 
+def addAeropuertoConnection(control):
+    #BIKF-CYHM llave
+    #BIKF-SKCL 
+    llave2 = mp.keySet(control["vuelos"])
+    for i in lt.iterator(llave2):
+        llave = i
         var1 = mp.get(control["vuelos"], llave)
-        #print(var1)
-        
-        if var1 == None: 
-            distancia = 0
-        else:
-            distancia = var1["value"]["TIEMPO_VUELO"]
-            #print(distancia)
-        addAeropuerto(control, origen)
-        addAeropuerto(control, destino)
-        addConeccion(control, origen, destino, distancia)
+        nombre = llave.split("-")
+       
+        n1 = nombre[0]
+        #print(mp.keySet(control["mapadistancias"]))
+        var2 = mp.get(control["mapadistancias"], n1)
+        aero1 = var2["value"]
+        var3 = mp.get(control["mapadistancias"], nombre[1])
+        aero2 = var3["value"]
+        dhaver = conversion(aero1, aero2)
+        distancia = int(var1["value"]["TIEMPO_VUELO"])
+        #print(distancia)
+        nodoida = var1["value"]["ORIGEN"]
+        nodovuelta = var1["value"]["DESTINO"]
+        addAeropuerto(control, nodoida)
+        addAeropuerto(control, nodovuelta)
+        addConeccion(control, nodoida, nodovuelta, distancia)
+        addAeropuertoHaversine(control, nodoida)
+        addAeropuertoHaversine(control, nodovuelta)
+        addConeccionHaversine(control, nodoida, nodovuelta, dhaver)
+    return control
+   
+def conversion(v1, v2):
+    #print(v1)
+    v1l = (v1["LATITUD"])
+    #print(v1l)
+    arre = v1l.replace(",", ".")
+    v1lat = float(arre)
+
+    v1lo = (v1["LONGITUD"])
+    arre1 = v1lo.replace(",", ".")
+    v1lon = float(arre1)
+
+    v2l = (v2["LATITUD"])
+    arre2 = v2l.replace(",", ".")
+    v2lat = float(arre2)
+
+
+    v2lo = (v2["LONGITUD"])
+    arre3 = v2lo.replace(",", ".")
+    v2lon = float(arre3)
+
+    final = haversine((v1lat, v1lon), (v2lat, v2lon), unit=Unit.KILOMETERS)
+    
+
+    return final
+
+def crearmapadistancia(control, aeropuerto):
+    try:
+        llave = aeropuerto["ICAO"]
+        #print(llave)
+        if not mp.contains(control["mapadistancias"], llave):
+            mp.put(control["mapadistancias"], llave, aeropuerto)
         return control
     except Exception as exp:
-        error.reraise(exp, 'model:addAeropuertoConnection')
+        error.reraise(exp, 'model:crearmapa') 
         
 def crearmapa(control, icaoida, icaodevuelta, elemento):
     try:
@@ -152,6 +203,7 @@ def crearmapa(control, icaoida, icaodevuelta, elemento):
     except Exception as exp:
         error.reraise(exp, 'model:crearmapa') 
 
+
 def addAeropuerto(control, name):
     try: 
         if gr.containsVertex(control["aeropuertos"], name) is False:
@@ -160,7 +212,16 @@ def addAeropuerto(control, name):
     except Exception as exp:
         error.reraise(exp, 'model:addAeropuerto')
 
+def addAeropuertoHaversine(control, name):
+    try: 
+        if gr.containsVertex(control["aeropuertosHaversine"], name) is False:
+            gr.insertVertex(control["aeropuertosHaversine"], name)
+        return control
+    except Exception as exp:
+        error.reraise(exp, 'model:addAeropuertoHaversine')
+
 def formatVertex(vuelo):
+    #print(vuelo)
     name = vuelo["ICAO"]
     return name
 
@@ -170,31 +231,6 @@ def distancialimpia(ultimovuelo, vuelo):
     if ultimovuelo['TIEMPO_VUELO'] == '':
         ultimovuelo['TIEMPO_VUELO'] = 0
 
-def distanciakm(control):
-    ultimovuelo["ORIGEN"]
-    vuelo["ORIGEN"]
-    ultimovuelo["DESTINO"]
-    vuelo["DESTINO"]
-        
-    for i in lt.iterator(control):
-        if ultimovuelo["ORIGEN"] == i["ICAO"]:
-            longi = i["LONGITUD"]
-            lati = I["LATITUD"]
-            var1 = (lati, longi)
-            if ultimovuelo["DESTINO"] == i["ICAO"]:
-                longi2 = i["LONGITUD"]
-                lati2 = I["LATITUD"]
-                var2 = (lati2, longi2)
-        if vuelo["ORIGEN"] == i["ICAO"]:
-            longi = i["LONGITUD"]
-            lati = I["LATITUD"]
-            var1 = (lati, longi)
-            if vuelo["DESTINO"] == i["ICAO"]:
-                longi2 = i["LONGITUD"]
-                lati2 = I["LATITUD"]
-                var2 = (lati2, longi2)
-
-    return haversine(var1, var2, unit=Unit.KILOMETERS)      
 
 
 """
@@ -227,6 +263,11 @@ def addConeccion(control, origen, destino, distancia):
         gr.addEdge(control["aeropuertos"], origen, destino, distancia)
     return control
 
+def addConeccionHaversine(control, origen, destino, distancia):
+    edge = gr.getEdge(control["aeropuertosHaversine"], origen, destino)
+    if edge is None:
+        gr.addEdge(control["aeropuertosHaversine"], origen, destino, distancia)
+    return control
 
 def get_data(data_structs, id):
     """
@@ -244,11 +285,18 @@ def data_size(data_structs):
     pass
 
 
-def req_1(data_structs):
+def req_1(data_structs, p_origen, p_destino):
     """
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
+    for i in lt.iterator(data_structs["listaAeropuertos"]):
+        if i["LATITUD"] == p_origen[0] and i["LONGITUD"] == p_origen[1]:
+            icao_origen = i["ICAO"]
+        if i["LATITUD"] == p_destino[0] and i["LONGITUD"] == p_destino[1]:
+            icao_destino = i["ICAO"]
+
+    var1 = gr.getEdge(data_structs["aeropuertos"], icao_origen, icao_destino)
     pass
 
 
