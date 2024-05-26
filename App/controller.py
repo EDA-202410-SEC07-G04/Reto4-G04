@@ -36,17 +36,51 @@ def new_controller():
     Crea una instancia del modelo
     """
     #TODO: Llamar la función del modelo que crea las estructuras de datos
-    pass
+    control = model.new_data_structs()
+    return control
 
 
 # Funciones para la carga de datos
 
-def load_data(control, filename):
+def load_data(control):
     """
     Carga los datos del reto
     """
     # TODO: Realizar la carga de datos
-    pass
+    load_flights(control)
+    load_airports(control)
+    model.addAeropuertoConnection(control)
+    
+
+def load_airports(control):
+    servicesfile = cf.data_dir + "airports-2022.csv"
+    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
+                                delimiter=";")
+    lastservice = None
+    for service in input_file:
+        model.crearmapadistancia(control, service) 
+        model.add_data(control, service)
+        if lastservice is not None:
+            #print(lastservice['ICAO'])
+            sameservice = lastservice['ICAO'] == service['ICAO']
+            samedirection = lastservice['CIUDAD'] == service['CIUDAD']
+            samebusStop = lastservice['PAIS'] == service['PAIS']
+            
+        lastservice = service
+    #model.addRouteConnections(analyzer)
+    return control
+
+def load_flights(control):
+    servicesfile = cf.data_dir + "fligths-2022.csv"
+    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
+                                delimiter=";")
+    for flight in input_file:
+        sameservice = flight['ORIGEN']
+        sameservice2 = flight['DESTINO']
+        #print(sameservice, sameservice2)
+        elemento = flight
+        model.crearmapa(control, sameservice, sameservice2, elemento) 
+    return control
 
 
 # Funciones de ordenamiento

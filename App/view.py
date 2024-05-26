@@ -28,6 +28,7 @@ from DISClib.ADT import stack as st
 from DISClib.ADT import queue as qu
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
+from DISClib.ADT import graph as gr
 assert cf
 from tabulate import tabulate
 import traceback
@@ -45,8 +46,8 @@ def new_controller():
         Se crea una instancia del controlador
     """
     #TODO: Llamar la función del controlador donde se crean las estructuras de datos
-    pass
-
+    control = controller.new_controller()
+    return control
 
 def print_menu():
     print("Bienvenido")
@@ -67,7 +68,23 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    pass
+    controller.load_data(control)
+    espe = mp.get(control["vuelos"], "SKMD-SKVP")
+    #print(control["aeropuertos"])
+    cr7 = gr.numEdges(control["aeropuertos"])
+    print(cr7)
+    #print(mp.size(control["vuelos"]))
+    #print(mp.get(control["vuelos"], "BIKF-SKCL"))
+    #print(espe)
+    vertices = gr.numVertices(control["aeropuertos"])
+    m10 = gr.getEdge(control["aeropuertos"], "BIKF", "SKCL")
+    m11 = gr.getEdge(control["aeropuertosHaversine"], "BIKF", "SKCL")
+    
+    print(m10)
+    print(m11)
+    #print(mp.keySet(control["mapadistancias"]))
+    #print(mp.get(control["mapadistancias"], "MYAM"))
+    #print(vertices)
 
 
 def print_data(control, id):
@@ -149,6 +166,8 @@ if __name__ == "__main__":
     """
     Menu principal
     """
+    default_limit = 2000
+    sys.setrecursionlimit(default_limit*10)
     working = True
     #ciclo del menu
     while working:
