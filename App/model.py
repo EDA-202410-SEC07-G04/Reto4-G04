@@ -38,7 +38,7 @@ from DISClib.ADT import graph as gr
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Algorithms.Graphs import bellmanford as bf
-from DISClib.Algorithms.Graphs import bfs
+from DISClib.Algorithms.Graphs import bfs as bfs
 from DISClib.Algorithms.Graphs import dfs
 from DISClib.Algorithms.Graphs import prim
 from DISClib.Algorithms.Sorting import shellsort as sa
@@ -345,6 +345,12 @@ def req_2(data_structs, origen, destino):
 
     if may < 30:
         aeropuerto_des = i["ICAO"], i["NOMBRE"], i["CIUDAD"], i["PAIS"]
+
+
+
+    #camino entre los dos aeropuertos
+    itinerario = bfs.pathTo(aeropuerto_or, aeropuerto_des)
+    print(itinerario)
     pass
 
 
