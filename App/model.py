@@ -300,11 +300,51 @@ def req_1(data_structs, p_origen, p_destino):
     pass
 
 
-def req_2(data_structs):
+def req_2(data_structs, origen, destino):
     """
     Función que soluciona el requerimiento 2
     """
     # TODO: Realizar el requerimiento 2
+
+    lista_distancias = lt.newList("ARRAY_LIST")
+
+
+    for i in lt.iterator(data_structs["listaAeropuertos"]): #para el aeropuerto más cercano de origen
+        latitud_aero = i["LATITUD"]
+        longitud_aero = i["LONGITUD"]
+
+        identificador = haversine(origen[0], origen[1], latitud_aero, longitud_aero)
+        valores = i, identificador
+        lt.addLast(lista_distancias, valores)
+
+    for i in lt.iterator(lista_distancias):
+            mayor = 99999
+
+            if i[1] <= mayor:
+                mayor = i[1]
+
+    if mayor < 30:
+        aeropuerto_or = i["ICAO"], i["NOMBRE"], i["CIUDAD"], i["PAIS"]
+
+
+
+
+    for i in lt.iterator(data_structs["listaAeropuertos"]): #para el aeropuerto más cercano de destino
+        latitud_aero = i["LATITUD"]
+        longitud_aero = i["LONGITUD"]
+
+        identificador = haversine(destino[0], destino[1], latitud_aero, longitud_aero)
+        valores = i, identificador
+        lt.addLast(lista_distancias, valores)
+
+    for i in lt.iterator(lista_distancias):
+            may = 99999
+
+            if i[1] <= mayor:
+                may = i[1]
+
+    if may < 30:
+        aeropuerto_des = i["ICAO"], i["NOMBRE"], i["CIUDAD"], i["PAIS"]
     pass
 
 
