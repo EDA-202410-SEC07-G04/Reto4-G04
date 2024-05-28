@@ -80,6 +80,7 @@ def load_flights(control):
         #print(sameservice, sameservice2)
         elemento = flight
         model.crearmapa(control, sameservice, sameservice2, elemento) 
+        model.add_data_flights(control, flight)
     return control
 
 
@@ -131,8 +132,8 @@ def req_4(control):
     """
     Retorna el resultado del requerimiento 4
     """
-    # TODO: Modificar el requerimiento 4
-    pass
+    ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados = model.req_4(control)
+    return ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados
 
 
 def req_5(control):
@@ -150,12 +151,11 @@ def req_6(control):
     pass
 
 
-def req_7(control):
+def req_7(control, long1, lat1, long2, lat2):
     """
     Retorna el resultado del requerimiento 7
     """
-    # TODO: Modificar el requerimiento 7
-    pass
+    model.req_7(control, long1, lat1, long2, lat2)
 
 
 def req_8(control):

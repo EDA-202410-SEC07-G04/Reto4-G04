@@ -52,7 +52,7 @@ import folium
 import webbrowser
 import sys
 import time
-import math
+from math import sin,cos,sqrt,asin,pi
 from haversine import haversine, Unit
 assert cf
 
@@ -78,7 +78,9 @@ def new_data_structs():
             "vuelos": None,
             "costos": None,
             "listaAeropuertos": None,
-            "aeropuertosHaversine": None
+            "aeropuertosHaversine": None,
+            "listaVuelos": None
+
         }
     
         control["vuelos"] = mp.newMap(numelements=3020,
@@ -101,6 +103,8 @@ def new_data_structs():
 
         control["listaAeropuertos"] = lt.newList("ARRAY_LIST")
 
+        control["listaVuelos"] = lt.newList("ARRAY_LIST")
+
         return control
     except Exception as exp:
         error.reraise(exp, 'model:new_data_structs')
@@ -115,6 +119,11 @@ def add_data(data_structs, data):
     #TODO: Crear la función para agregar elementos a una lista
     lt.addLast(data_structs["listaAeropuertos"], data)
     return data_structs
+
+def add_data_flights(data_structs, data):
+    lt.addLast(data_structs["listaVuelos"], data)
+    return data_structs
+
 
 
 # Funciones para creacion de datos
@@ -315,13 +324,83 @@ def req_3(data_structs):
     # TODO: Realizar el requerimiento 3
     pass
 
+def cmp_req4(da, db)  :
+    di = da[1]
+    df = db[1]
+    ppi = da[0]
+    ppf = db[0]
+    if di < df:
+        return False
+    elif di > df:
+        return True
+    else:
+        if ppi <= ppf:
+            return True
+        else:
+            return False
+
 
 def req_4(data_structs):
     """
     Función que soluciona el requerimiento 4
     """
-    # TODO: Realizar el requerimiento 4
-    pass
+    #encontrar el aeropuerto de mayor importancia 
+    #identificar el que más vuelos tiene 
+    #crear lista base donde se guardan el # de vuelos (arcos) que salen y entran del aeropuerto 
+    mapa_base = mp.newMap(numelements=531, maptype="CHAINING", loadfactor=4.0)
+    lista_base = lt.newList(datastructure="ARRAY_LIST")
+    lst_ver = lt.newList(datastructure="ARRAY_LIST")
+    for ae in lt.iterator(data_structs["listaVuelos"]):
+        suma = 0 
+        aeropuerto = ae["ORIGEN"]
+        if lt.isPresent(lst_ver, aeropuerto) == 0 and ae["TIPO_VUELO"]=="AVIACION_CARGA":
+            lt.addLast(lst_ver, aeropuerto)
+            datoss = gr.degree(data_structs["aeropuertosHaversine"], aeropuerto)
+            datoss2 = gr.adjacentEdges(data_structs["aeropuertosHaversine"], aeropuerto)
+            for i in lt.iterator(datoss2):
+                suma+= i["weight"] 
+        #mp.put(mapa_base,aeropuerto,lt.size(datoss))
+            tpl = [aeropuerto, datoss,suma]
+            lt.addLast(lista_base,tpl)
+        else:
+            None
+
+    #con la info guardada, sacar el de mayor conexiones
+    merg.sort(lista_base, cmp_req4)
+    buscado = lt.getElement(lista_base,1)
+    ICAO_busc = buscado[0]
+    tot_busc = buscado[1]
+    dist_busc = buscado[2]
+    #para datos faltantes #identificador ICAO, nombre, ciudad, país, total vuelos ()
+    #hacer recorrdio sobre la lisat de aeropuertos 
+    for aepr in lt.iterator(data_structs["listaAeropuertos"]):
+        nn = aepr["ICAO"]
+        if nn == ICAO_busc:
+            nom_busc = aepr["NOMBRE"]
+            ciudad_busc = aepr["CIUDAD"]
+            pais_busc = aepr["PAIS"]
+
+    #buscar # total de trayectos posibles 
+    
+    #lst_2 = lt.newList(datastructure="ARRAY_LIST")
+
+    #recorridos = djk.distTo(nom_busc, aer)
+    recorridos = djk.Dijkstra(data_structs["aeropuertosHaversine"], ICAO_busc)
+    #de recorrdios sacar el # de trayectos posibles y la info de cada trayecto usando vuelos 
+
+    #en lista_vert_relacionados se guardan los vértices destino a los que se llegan usando Dijkstra y se usarán para buscar esos trayectos en vuelos 
+    lista_vert_relacionados = recorridos["iminpq"]["elements"]
+    trayectos_posibles_tot = lt.size(lista_vert_relacionados)
+    #usando el map de vuelos sacar la info necesaria
+    return ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados
+
+#llave = nom_busc + "-" #+ aer
+    #mp.put(mapa_base, llave, recorridos)
+    #lt.addLast(lst_2, llave)
+
+    #de aquí sale la distancia, el tiempo del trayecto y el tipo de avión
+
+    #información del aeropuerto base
 
 
 def req_5(data_structs):
@@ -339,13 +418,89 @@ def req_6(data_structs):
     # TODO: Realizar el requerimiento 6
     pass
 
+def cmp_req7(da, db)  :
+    di = da[1]
+    df = db[1]
+    if di < df:
+        return True
+    elif di > df:
+        return False
+    else:
+        True
 
-def req_7(data_structs):
+def req_7(data_structs, long1, lat1, long2, lat2):
     """
     Función que soluciona el requerimiento 7
     """
-    # TODO: Realizar el requerimiento 7
+    #haversine((v1lat, v1lon), (v2lat, v2lon), unit=Unit.KILOMETERS)
+    #Pasar a distancia Haversine cada Aeropuerto dentro de una lista 
+    ##Fórmula de haversine
+    #d = 2*r*asin(sqrt(sin(c*(lat2-lat1)/2)**2 + cos(c*lat1)*cos(c*lat2)*sin(c*(long2-long1)/2)**2))
+    Haversine_ICAO_lst_ini = lt.newList(datastructure="ARRAY_LIST")
+    Haversine_ICAO_lst_fin = lt.newList(datastructure="ARRAY_LIST")
+
+    #Haversine_ICAO_map_ini = mp.newMap(numelements=531, maptype="CHAINING", loadfactor=4.0) 
+    #Haversine_ICAO_map_fin = mp.newMap(numelements=531, maptype="CHAINING", loadfactor=4.0) 
+
+    # en cada map se guarda el ICAO y la distancia desde el punto ini y fin dados por parámetros 
+
+    lst_ver = lt.newList(datastructure="ARRAY_LIST")
+
+    usuario_ini = (lat1, long1)
+    usuario_fin = (lat2, long2)
+    for i in lt.iterator(data_structs["listaAeropuertos"]):
+        #comparar long1 y lat1 con cada aeropuerto 
+        lati = float(i["LATITUD"].replace(",", "."))
+        longi = float(i["LONGITUD"].replace(",", "."))
+        aeropuerto = (lati, longi)
+        
+        d_ini = haversine(aeropuerto, usuario_ini)
+        d_fin = haversine(aeropuerto, usuario_fin)
+        
+        val = [i["ICAO"], d_ini]
+        lt.addLast(Haversine_ICAO_lst_ini, val)
+        val = [i["ICAO"], d_fin]
+        lt.addLast(Haversine_ICAO_lst_fin, val)
+
+        #mp.put(Haversine_ICAO_map_ini,i["ICAO"],d_ini)
+        #mp.put(Haversine_ICAO_map_fin,i["ICAO"],d_fin)
+    #ordenar la info para obtener el de menos distancia en ambos casos
+    merg.sort(Haversine_ICAO_lst_ini, cmp_req7) 
+    merg.sort(Haversine_ICAO_lst_fin, cmp_req7)
+    #confirmar que 
+    #confirmar que hay camino desde cada aeropuerto
+    #hacer Dijkstra desde el nombre de origen
+    jnd = 0
+    cont = 0
+    if 
+    while jnd  == 0:
+        cont += 1
+        nom_ini = lt.getElement(Haversine_ICAO_lst_ini, cont)
+        nom_ini = nom_ini[0]
+        nom_fin = lt.getElement(Haversine_ICAO_lst_fin, cont)
+        nom_fin = nom_fin[0]
+        rta = djk.Dijkstra(data_structs["aeropuertosHaversine"], nom_ini)
+        lista_vert_relacionados = rta["iminpq"]["elements"]
+        #comprobar que el vertice destino esté dentro del rango 
+        jnd = lt.isPresent(lista_vert_relacionados, nom_fin)
+    # distancias entre los aeropuertos seleccionados
+    dist_aeropuertos = gr.getEdge(data_structs["aeropuertosHaversine"], nom_ini, nom_fin)
+    tiempo_aeropuertos = gr.getEdge(data_structs["aeropuertos"], nom_ini, nom_fin)
+    # número de aeropuertos que se visitan en el camino encontrado 
+    datos = rta["visited"]["table"]["elements"]
+    ihiyg = djk.distTo()
+    aaa = djk.pathTo(rta, nom_fin)
     pass
+
+
+"""
+    for j in lt.iterator(Haversine_ICAO_lst_fin):
+        nom_ini = lt.getElement(Haversine_ICAO_lst_ini, 1)
+        nom_fin = lt.getElement(Haversine_ICAO_lst_fin, 1)
+        if djk.pathTo()
+        if gr.getEdge()
+   
+"""
 
 
 def req_8(lst):
