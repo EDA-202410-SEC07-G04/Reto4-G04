@@ -122,8 +122,32 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 4
-    pass
+    ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados = controller.req_4(control)
+    print("El tiempo de ejecución es: ")
+    print("Datos del aeropuerto más importante e la categoría AVIÓN_CARGA:")
+    print("      ICAO:", ICAO_busc)
+    print("      Nombre:", nom_busc)
+    print("      Ciudad:", ciudad_busc)
+    print("      País:", pais_busc)
+    print("      Concurrencia de carga:", tot_busc)
+    print("      Distancia total (arcos relacionados con ",ICAO_busc, "): ", dist_busc)
+    print("      Total trayectos posibles: ", trayectos_posibles_tot)
+    print("Información secuencia de trayectos:")
+    #info por trayecto
+    for ii in lt.iterator(lista_vert_relacionados):
+            llave = ICAO_busc + "-" + ii["key"]
+            eiu = gr.getEdge(control["aeropuertosHaversine"],ICAO_busc, ii["key"])
+            valor = mp.get(control["vuelos"], llave)
+            if valor is not None:
+                valor2 = valor["value"]
+                #en valor están los encabezados de flights
+                print("       Aeropuerto origen: ", valor2["ORIGEN"])
+                print("       Aeropuerto destino: ", valor2["DESTINO"])
+                print("       Distancia recorrida: ", ii["index"])
+                print("       Tiempo trayecto: ", valor2["TIEMPO_VUELO"])
+                print("       Tipo aeronave: ", valor2["TIPO_AERONAVE"])
+                print("----------------------------")
+
 
 
 def print_req_5(control):
@@ -142,12 +166,11 @@ def print_req_6(control):
     pass
 
 
-def print_req_7(control):
+def print_req_7(control, long1, lat1, long2, lat2):
     """
         Función que imprime la solución del Requerimiento 7 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 7
-    pass
+    controller.req_7(control, long1, lat1, long2, lat2)
 
 
 def print_req_8(control):
@@ -186,6 +209,7 @@ if __name__ == "__main__":
             print_req_3(control)
 
         elif int(inputs) == 5:
+            print("A continuación, los resultados encontrados: ")
             print_req_4(control)
 
         elif int(inputs) == 6:
@@ -195,7 +219,11 @@ if __name__ == "__main__":
             print_req_6(control)
 
         elif int(inputs) == 8:
-            print_req_7(control)
+            long1 = float(input("Por favor, digite la longitud del punto de origen: "))
+            lat1 = float(input("Por favor, digite la latitud del punto de origen: "))
+            long2 = float(input("Por favor, digite la longitud del punto de destino: "))
+            lat2 = float(input("Por favor, digite la latitud del punto de destino: "))
+            print_req_7(control, long1, lat1, long2, lat2)
 
         elif int(inputs) == 9:
             print_req_8(control)
