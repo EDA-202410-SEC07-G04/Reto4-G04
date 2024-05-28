@@ -472,7 +472,6 @@ def req_7(data_structs, long1, lat1, long2, lat2):
     #hacer Dijkstra desde el nombre de origen
     jnd = 0
     cont = 0
-    if 
     while jnd  == 0:
         cont += 1
         nom_ini = lt.getElement(Haversine_ICAO_lst_ini, cont)
