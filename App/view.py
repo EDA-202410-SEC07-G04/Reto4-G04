@@ -79,12 +79,44 @@ def load_data(control):
     vertices = gr.numVertices(control["aeropuertos"])
     m10 = gr.getEdge(control["aeropuertos"], "BIKF", "SKCL")
     m11 = gr.getEdge(control["aeropuertosHaversine"], "BIKF", "SKCL")
-    
+    m12 = gr.getEdge(control["aeropuertosHaversine"], "SKCL", "BIKF")
+    m13 = gr.getEdge(control["aeropuertosHaversineNodiri"], "BIKF", "SKCL")
+    m14 = gr.getEdge(control["aeropuertosHaversineNodiri"], "SKCL", "BIKF")
+    print(mp.get(control["vuelos"], "SKUA-SKPB"))
+
     print(m10)
     print(m11)
+    print(m12)
+    print(m13)
+    print(m14)
+    print(len(eliminar_copias(pruebas(control))))
     #print(mp.keySet(control["mapadistancias"]))
     #print(mp.get(control["mapadistancias"], "MYAM"))
     #print(vertices)
+
+def pruebas(control):
+    #BOG 74
+    #SMT 34
+    #APIAY 85
+    #print(lt.size(control["listaVuelos"]))
+    fn1 = lt.newList("ARRAY_LIST")
+    for i in lt.iterator(control["listaVuelos"]):
+        #print(i)
+        if i["TIPO_VUELO"] == "MILITAR":
+            if i["ORIGEN"] == "SKAP" or i["DESTINO"]=="SKAP":
+                lt.addLast(fn1, i)
+    
+    return fn1
+
+def eliminar_copias(lista):
+    sin_copias = []
+    elementos_vistos = set()
+    for diccionario in lt.iterator(lista):
+        items_tuple = tuple(sorted(diccionario.items()))
+        if items_tuple not in elementos_vistos:
+            sin_copias.append(diccionario)
+            elementos_vistos.add(items_tuple)
+    return sin_copias
 
 
 def print_data(control, id):
@@ -122,8 +154,8 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados = controller.req_4(control)
-    print("El tiempo de ejecución es: ")
+    ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados, r1 = controller.req_4(control)
+    print("El tiempo de ejecución es: "+ str(r1))
     print("Datos del aeropuerto más importante e la categoría AVIÓN_CARGA:")
     print("      ICAO:", ICAO_busc)
     print("      Nombre:", nom_busc)
@@ -155,7 +187,26 @@ def print_req_5(control):
         Función que imprime la solución del Requerimiento 5 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 5
-    pass
+    r1, r2, r3, r4, r5, cant = controller.req_5(control)
+    print("Tiempo: "+ str(r1))
+    print("Aeropuerto mas importante: " + str(r2["value"])+ " cantidad de vuelos saliendo y llegando: "+ str(cant))
+    print("distancia total de los trayectos sumados: " + str(r3))
+    print("Numero total de trayectos posibles: " + str(r4))
+    for i in lt.iterator(r5):
+        print("--------------------------------")
+        var2 = mp.get(control["mapadistancias"], r2["value"]["ICAO"])["value"]
+        var3 = mp.get(control["mapadistancias"], i["key"])["value"]
+        llave = str(r2["value"]["ICAO"]) + "-" + str(i["key"])
+        vuelo = mp.get(control["vuelos"], llave)
+        #print(var2)
+        print("Aeropuerto de origen: " + str(r2["value"]["ICAO"])+" " + str(var2["CIUDAD"])+" " + str(var2["PAIS"])+" " + str(var2["NOMBRE"]))
+        print("Aeropuerto de destino: " + str(var3["ICAO"])+" " + str(var3["CIUDAD"])+" " + str(var3["PAIS"])+" " + str(var3["NOMBRE"]))
+        print("Distancia recorrida: " + str(i["index"]) + "km")
+        if vuelo == None:
+            print("escala - sin vuelo directo")
+        else:
+            print("timepo del vuelo: " + str(vuelo["value"]["TIEMPO_VUELO"]) + " min. Tipo de aeronave: "+ str(vuelo["value"]["TIPO_AERONAVE"]))
+        print("--------------------------------")
 
 
 def print_req_6(control):
@@ -163,7 +214,8 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    c_aereo = int(input("Cantidad de aeropuertos: "))
+    r1, r2 = controller.req_6(control, c_aereo)
 
 
 def print_req_7(control, long1, lat1, long2, lat2):
