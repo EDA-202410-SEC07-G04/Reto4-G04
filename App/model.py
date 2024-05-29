@@ -46,6 +46,7 @@ from DISClib.Algorithms.Sorting import insertionsort as ins
 from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
+from DISClib.ADT import stack
 from DISClib.Utils import error as error
 from datetime import datetime as dt
 import folium
@@ -466,38 +467,70 @@ def req_6(data_structs, c_aero):
     var1 = r62(r61(data_structs))
     var2 = lt.subList(var1, 1, c_aero)
     aero = (lt.getElement(var2, 1))
+    concurrencia_comercial = aero[1]
+    #print(concurrencia_comercial)
+    #print(aero)
     #print(aero[0])
     r2 = mp.get(data_structs["mapadistancias"], aero[0])["value"]
-    #print(r2)
-    data_structs["caminos6"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], r2["ICAO"])
-    r5 = (data_structs["caminos6"]["visited"])
-    #print(r5)
+    #print(r2["ICAO"])
+    #ae_inicial = 
+    caminito(data_structs, r2["ICAO"])
+    #print(data_structs["caminos6"])
+    #r5 = (data_structs["caminos6"]["visited"])
+    #data_structs["caminos6"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], r2["ICAO"])
     lst = lt.newList("ARRAY_LIST")
     for i in lt.iterator(var2):
-        ff = mp.get(r5, i[0])
-        print(ff)
+        ae_destino = i[0]
         #print(ff["value"])
-        lt.addLast(lst, ff["value"])
+        lt.addLast(lst, ae_destino)
 
     lt.deleteElement(lst, 1)
     #print(lst)
+    #print(r5)
 
+    #print(lst)
+
+    finali = lt.newList("ARRAY_LIST")
     for i in lt.iterator(lst):
-        print(i)
-        tot_aero = tama(lst)
-        print(tot_aero)
+        tot_aero_en_camino, lst_vuelos = destinito(data_structs, i)           
+        lt.addLast(finali, (tot_aero_en_camino, lst_vuelos["elements"]))
 
-def tama(lst):
+    #destinito(data_structs, "SKRG")  
+    lst8 = lt.newList("ARRAY_LIST")
     for i in lt.iterator(lst):
-        var1 = i["edgeTo"]
-        if var1 is not list:
-            tama = 1
-        else:
-            tama = 0
-            for i in var1:
-                tama +=1
+        #print(i)
+        ele = mp.get(data_structs["mapadistancias"], i)["value"]
+        lt.addLast(lst8, ele) 
 
-    return tama
+    req8 = req_8(lst8, r2)  
+    
+    return r2, concurrencia_comercial, finali
+
+def caminito(data_structs, ae):
+    data_structs["caminos6"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], ae)
+    return data_structs
+
+def destinito(data_structs, ae):
+    #caminito(data_structs, ae)
+    path = djk.pathTo(data_structs["caminos6"], ae)
+    #print(path)
+    lst = lt.newList("ARRAY_LIST")
+    if path is not None:
+        #print("messi")
+        pathlen = stack.size(path)
+        #print('El camino es de longitud: ' + str(pathlen))
+        while (not stack.isEmpty(path)):
+            stop = stack.pop(path)
+            lt.addLast(lst, stop)
+            #print(stop)
+            #print("------------------")
+    else:
+        pathlen = 0
+        stop = 0
+        print('No hay camino')
+    
+    return pathlen, lst
+
 
 def r61(data_structs):
     dic = {}
