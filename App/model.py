@@ -52,6 +52,7 @@ import folium
 import webbrowser
 import sys
 import time
+import math
 from math import sin,cos,sqrt,asin,pi
 from haversine import haversine, Unit
 assert cf
@@ -79,7 +80,9 @@ def new_data_structs():
             "costos": None,
             "listaAeropuertos": None,
             "aeropuertosHaversine": None,
-            "listaVuelos": None
+            "listaVuelos": None,
+            "caminos5": None,
+            "caminos6": None
 
         }
     
@@ -98,6 +101,11 @@ def new_data_structs():
 
         control["aeropuertosHaversine"] = gr.newGraph(datastructure="ADJ_LIST",
                                              directed=True,
+                                             size=428,
+                                             cmpfunction=compararAeropuertos)
+
+        control["aeropuertosHaversineNodiri"] = gr.newGraph(datastructure="ADJ_LIST",
+                                             directed=False,
                                              size=428,
                                              cmpfunction=compararAeropuertos)
 
@@ -164,6 +172,9 @@ def addAeropuertoConnection(control):
         addAeropuertoHaversine(control, nodoida)
         addAeropuertoHaversine(control, nodovuelta)
         addConeccionHaversine(control, nodoida, nodovuelta, dhaver)
+        addAeropuertoHaversineNodiri(control, nodoida)
+        addAeropuertoHaversineNodiri(control, nodovuelta)
+        addConeccionHaversineNodiri(control, nodoida, nodovuelta, dhaver)
     return control
    
 def conversion(v1, v2):
@@ -228,6 +239,14 @@ def addAeropuertoHaversine(control, name):
     except Exception as exp:
         error.reraise(exp, 'model:addAeropuertoHaversine')
 
+def addAeropuertoHaversineNodiri(control, name):
+    try: 
+        if gr.containsVertex(control["aeropuertosHaversineNodiri"], name) is False:
+            gr.insertVertex(control["aeropuertosHaversineNodiri"], name)
+        return control
+    except Exception as exp:
+        error.reraise(exp, 'model:addAeropuertoHaversineNodiri')
+
 # Funciones de consulta
 
 
@@ -241,6 +260,12 @@ def addConeccionHaversine(control, origen, destino, distancia):
     edge = gr.getEdge(control["aeropuertosHaversine"], origen, destino)
     if edge is None:
         gr.addEdge(control["aeropuertosHaversine"], origen, destino, distancia)
+    return control
+
+def addConeccionHaversineNodiri(control, origen, destino, distancia):
+    edge = gr.getEdge(control["aeropuertosHaversineNodiri"], origen, destino)
+    if edge is None:
+        gr.addEdge(control["aeropuertosHaversineNodiri"], origen, destino, distancia)
     return control
 
 def get_data(data_structs, id):
@@ -373,15 +398,134 @@ def req_5(data_structs):
     Función que soluciona el requerimiento 5
     """
     # TODO: Realizar el requerimiento 5
-    pass
 
 
-def req_6(data_structs):
+    varsi = r51(data_structs)
+    aeropuerto, cant = r52(varsi)
+    r2 = mp.get(data_structs["mapadistancias"], str(aeropuerto))
+    data_structs["caminos5"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], r2["value"]["ICAO"])
+    r5 = (data_structs["caminos5"]["iminpq"]["elements"])
+    
+    r3 = 0
+    for i in lt.iterator(r5):
+        r3 += i["index"]
+
+    r4 = lt.size(r5)
+    #print(r2["key"])
+
+    ae = mp.get(data_structs["mapadistancias"], r2["key"])["value"]
+    #print(ae)
+
+    lst = lt.newList("ARRAY_LIST")
+    for i in lt.iterator(r5):
+        ele = mp.get(data_structs["mapadistancias"], i["key"])["value"]
+        lt.addLast(lst, ele)
+
+    req8 = req_8(lst, ae)
+
+    return r2, r3, r4, r5, cant
+
+def r51(data_structs):
+    dic = {}
+
+    for i in lt.iterator(data_structs["listaVuelos"]):
+        if i["TIPO_VUELO"] == "MILITAR":
+            ori = i["ORIGEN"]
+            des = i["DESTINO"]
+
+            if ori not in dic:
+                dic[ori] = {"salidas": 0, "llegadas": 0}
+            if des not in dic:
+                dic[des] = {"salidas": 0, "llegadas": 0}
+
+            dic[ori]["salidas"] += 1
+            dic[des]["llegadas"] += 1
+    
+    return dic
+
+def r52(salidas):
+    max_vuelos = 0
+    aero = None
+
+    for x, y in salidas.items():
+        tot = y["salidas"] + y["llegadas"]
+        if tot > max_vuelos:
+            max_vuelos = tot
+            aero = x
+
+    return aero, max_vuelos
+
+
+
+
+def req_6(data_structs, c_aero):
     """
     Función que soluciona el requerimiento 6
     """
     # TODO: Realizar el requerimiento 6
-    pass
+    var1 = r62(r61(data_structs))
+    var2 = lt.subList(var1, 1, c_aero)
+    aero = (lt.getElement(var2, 1))
+    #print(aero[0])
+    r2 = mp.get(data_structs["mapadistancias"], aero[0])["value"]
+    #print(r2)
+    data_structs["caminos6"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], r2["ICAO"])
+    r5 = (data_structs["caminos6"]["visited"])
+    #print(r5)
+    lst = lt.newList("ARRAY_LIST")
+    for i in lt.iterator(var2):
+        ff = mp.get(r5, i[0])
+        print(ff)
+        #print(ff["value"])
+        lt.addLast(lst, ff["value"])
+
+    lt.deleteElement(lst, 1)
+    #print(lst)
+
+    for i in lt.iterator(lst):
+        print(i)
+        tot_aero = tama(lst)
+        print(tot_aero)
+
+def tama(lst):
+    for i in lt.iterator(lst):
+        var1 = i["edgeTo"]
+        if var1 is not list:
+            tama = 1
+        else:
+            tama = 0
+            for i in var1:
+                tama +=1
+
+    return tama
+
+def r61(data_structs):
+    dic = {}
+
+    for i in lt.iterator(data_structs["listaVuelos"]):
+        if i["TIPO_VUELO"] == "AVIACION_COMERCIAL":
+            ori = i["ORIGEN"]
+            des = i["DESTINO"]
+
+            if ori not in dic:
+                dic[ori] = {"salidas": 0, "llegadas": 0}
+            if des not in dic:
+                dic[des] = {"salidas": 0, "llegadas": 0}
+
+            dic[ori]["salidas"] += 1
+            dic[des]["llegadas"] += 1
+    
+    return dic
+
+def r62(salidas):
+    final = lt.newList("ARRAY_LIST")
+    finalissima = lt.newList("ARRAY_LIST")
+    for x, y in salidas.items():
+        tot_vue = y["salidas"] + y["llegadas"]
+        lt.addLast(final, (x, tot_vue))
+
+    finalissima = merg.sort(final, cmp_req6)
+    return finalissima
 
 def cmp_req7(da, db)  :
     di = da[1]
@@ -467,17 +611,64 @@ def req_7(data_structs, long1, lat1, long2, lat2):
 """
 
 
-def req_8(lst):
+def req_8(lst, ae):
     """
     Función que soluciona el requerimiento 8
     """
     # TODO: Realizar el requerimiento 8
     start_time = get_time()
-    mapa = folium.Map(location=[0,0], zoom_start=2)
+    
+    # Crear la ubicación inicial
+    locacion = (float(ae["LATITUD"].replace(",", ".")), float(ae["LONGITUD"].replace(",", ".")))
+    mapa = folium.Map(location=locacion, zoom_start=2)
+    
+    # Añadir el marcador principal en color rojo
+    folium.Marker(
+        location=locacion,
+        popup=f"<b>{ae['NOMBRE']}</b><br>Ciudad: {ae['CIUDAD']}",
+        icon=folium.Icon(color='red')
+    ).add_to(mapa)
+
+    # Añadir marcadores adicionales y dibujar líneas desde la ubicación principal
+    for i in lt.iterator(lst):  # Assuming lst is a list of dictionaries
+        longi = i["LONGITUD"].replace(",", ".")
+        lati = i["LATITUD"].replace(",", ".")
+        loca = (lati, longi)
+        
+        folium.Marker(
+            location=loca,
+            popup=f"<b>{i['NOMBRE']}</b><br>Ciudad: {i['CIUDAD']}"
+        ).add_to(mapa)
+        
+        # Dibujar la línea desde la ubicación principal a la ubicación actual
+        folium.PolyLine(
+            [locacion, loca],
+            color='blue',  # Color de la línea
+            weight=2,      # Grosor de la línea
+            opacity=0.6    # Opacidad de la línea
+        ).add_to(mapa)
+
+    # Guardar el mapa en un archivo HTML y abrirlo en el navegador
+    mapa.save("mapa.html")
+    webbrowser.open("mapa.html")
+    
+    end_time = get_time()
+    deltaTime = delta_time(start_time, end_time)
+    return deltaTime
+
+"""
+def req_8(lst, ae):
+    
+    # TODO: Realizar el requerimiento 8
+    start_time = get_time()
+    locacion = (ae["LATITUD"].replace(",", "."), ae["LONGITUD"].replace(",", "."))
+    mapa = folium.Map(location=locacion, zoom_start=2)
+    folium.Marker(location=locacion, 
+                        popup=f"<b>{ae['NOMBRE']}</b><br>Ciudad: {ae['CIUDAD']}", icon=folium.Icon(color='red')).add_to(mapa)
 
     for i in lt.iterator(lst):
-        longi = i["LONGITUD"]
-        lati= i["LATITUD"]
+        longi = i["LONGITUD"].replace(",", ".")
+        lati= i["LATITUD"].replace(",", ".")
 
         loca = (lati, longi)
         folium.Marker(location=loca, 
@@ -488,6 +679,7 @@ def req_8(lst):
     end_time = get_time()
     deltaTime = delta_time(start_time, end_time)
     return deltaTime
+"""
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
@@ -541,3 +733,33 @@ def compararAeropuertos(date1, date2):
         return 1
     else:
         return -1
+
+def cmp_req6(x1, x2):
+    iata1 = x1[0]
+    iata2 = x2[0]
+    cant1 = x1[1]
+    cant2 = x2[1]
+    if cant1 > cant2:
+        return True
+    elif cant1 == cant2:
+        if iata1 < iata2:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def get_time():
+    """
+    devuelve el instante tiempo de procesamiento en milisegundos
+    """
+    return float(time.perf_counter()*1000)
+
+
+def delta_time(start, end):
+    """
+    devuelve la diferencia entre tiempos de procesamiento muestreados
+    """
+    elapsed = float(end - start)
+    return elapsed

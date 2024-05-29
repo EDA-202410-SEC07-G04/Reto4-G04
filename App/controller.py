@@ -132,8 +132,11 @@ def req_4(control):
     """
     Retorna el resultado del requerimiento 4
     """
+    start_time = get_time()
     ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados = model.req_4(control)
-    return ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados
+    end_time = get_time()
+    r1 = delta_time(start_time, end_time)
+    return ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados, r1
 
 
 def req_5(control):
@@ -141,14 +144,22 @@ def req_5(control):
     Retorna el resultado del requerimiento 5
     """
     # TODO: Modificar el requerimiento 5
-    pass
+    start_time = get_time()
+    r2, r3, r4, r5, cant = model.req_5(control)
+    end_time = get_time()
+    r1 = delta_time(start_time, end_time)
+    return r1, r2, r3, r4, r5, cant
 
-def req_6(control):
+def req_6(control, c_aereo):
     """
     Retorna el resultado del requerimiento 6
     """
     # TODO: Modificar el requerimiento 6
-    pass
+    start_time = get_time()
+    r2 = model.req_6(control, c_aereo)
+    end_time = get_time()
+    r1 = delta_time(start_time, end_time)
+    return r1, r2
 
 
 def req_7(control, long1, lat1, long2, lat2):
