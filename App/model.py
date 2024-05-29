@@ -335,6 +335,10 @@ def req_4(data_structs):
     """
     Función que soluciona el requerimiento 4
     """
+
+    # toma el tiempo al inicio del proceso
+    ##start_time = get_time()
+
     #encontrar el aeropuerto de mayor importancia 
     #identificar el que más vuelos tiene 
     #crear lista base donde se guardan el # de vuelos (arcos) que salen y entran del aeropuerto 
@@ -383,6 +387,11 @@ def req_4(data_structs):
     lista_vert_relacionados = recorridos["iminpq"]["elements"]
     trayectos_posibles_tot = lt.size(lista_vert_relacionados)
     #usando el map de vuelos sacar la info necesaria
+
+    ##stop_time = time.get_time()
+    # calculando la diferencia en tiempo
+    ##delta_Time = time.delta_time(start_time, stop_time)
+
     return ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados
 
 #llave = nom_busc + "-" #+ aer
@@ -609,18 +618,52 @@ def req_7(data_structs, long1, lat1, long2, lat2):
     #ordenar la info para obtener el de menos distancia en ambos casos
     merg.sort(Haversine_ICAO_lst_ini, cmp_req7) 
     merg.sort(Haversine_ICAO_lst_fin, cmp_req7)
-    #confirmar que 
+    #confirmar que están a menos de 30 km de distancia 
     #confirmar que hay camino desde cada aeropuerto
     #hacer Dijkstra desde el nombre de origen
-    jnd = 0
-    cont = 0
+    cont = 1
+    jnd = lt.getElement(Haversine_ICAO_lst_ini, 1)
+    jnd = jnd[1]
+    #así se asegura que la distancia es menor a 30 
+
+    while jnd < 30:
+        
+        #esto aegura que los aeropuertos seleccionados están a menos de 30km buscando desde el menor 
+        cont += 1
+        nom_ini = lt.getElement(Haversine_ICAO_lst_ini, cont)
+        nom_ini = nom_ini[0]
+        nom_fin = lt.getElement(Haversine_ICAO_lst_fin, cont)
+        nom_fin = nom_fin[0]
+        jnd = lt.getElement(Haversine_ICAO_lst_ini, cont)
+        jnd = jnd[1]
+        #Dijkstra desde nom_ini (nombre vértice inicial) 
+        rta = djk.Dijkstra(data_structs["aeropuertos"], nom_ini)
+        #confirmar que hya camino desde VerticeA hasta Vertice B (nom_fin)
+        camino = djk.hasPathTo(rta, nom_fin)
+        if camino is True:
+            #significa que hay un camino, entonces tenerlo en cuenta 
+            #costo camino
+            costoo = djk.distTo(rta, nom_fin)
+            #reconstruir el camino
+            recorrido = djk.pathTo(rta, nom_fin)
+            jnd = 31 #porque encontró la primera opción de camino 
+        #comprobar que el vuelo es comercial. Es comercial si durante el camino que recorre ese vuelo es comercial usando las llaves "ORIGEN"
+        #for i in lt.iterator(recorrido):
+            #a=1
+
+    """
+
+
+
     while jnd  == 0:
         cont += 1
         nom_ini = lt.getElement(Haversine_ICAO_lst_ini, cont)
         nom_ini = nom_ini[0]
         nom_fin = lt.getElement(Haversine_ICAO_lst_fin, cont)
         nom_fin = nom_fin[0]
-        rta = djk.Dijkstra(data_structs["aeropuertosHaversine"], nom_ini)
+        rta = djk.Dijkstra(data_structs["aeropuertos"], nom_ini)
+        #confirmar que hya camino desde VerticeA hasta Vertice B
+        camino = djk.hasPathTo(rta, nom_fin)
         lista_vert_relacionados = rta["iminpq"]["elements"]
         #comprobar que el vertice destino esté dentro del rango 
         jnd = lt.isPresent(lista_vert_relacionados, nom_fin)
@@ -632,6 +675,7 @@ def req_7(data_structs, long1, lat1, long2, lat2):
     ihiyg = djk.distTo()
     aaa = djk.pathTo(rta, nom_fin)
     pass
+    """
 
 
 """
