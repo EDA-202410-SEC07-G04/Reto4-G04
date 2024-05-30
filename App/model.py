@@ -866,7 +866,7 @@ def req_7(data_structs, long1, lat1, long2, lat2):
             vert_B = final["vertexB"]
             llave = vert_A +"-"+vert_B
             lt.addLast(lst_secuencia,llave)
-    return rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia
+    return rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia, nom_ini
     
     
 
