@@ -170,7 +170,24 @@ def print_req_1(control):
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    pass
+    l_ori = float(input("Digame la latitud del punto de origen (con punto): "))
+    lo_ori = float(input("Digame la longitud del punto de origen (con punto): "))
+    l_des = float(input("Digame la latitud del punto de destino (con punto): "))
+    lo_des = float(input("Digame la longitud del punto de destino (con punto): "))
+    p_origen = (l_ori, lo_ori)
+    p_destino = (l_des, lo_des)
+    r1, km_tot, tot_aero_en_camino, lst_vuelos, tm_tot, ae_ori, ae_des = controller.req_1(control, p_origen, p_destino)
+    print("Tiempo: "+ str(r1))
+    print("Distancia total del viaje: "+str(km_tot))
+    print("cantidad de aeropuertos que se visitan en el camino: "+ str(tot_aero_en_camino))
+    print("Aeropuerto de origen: "+str(ae_ori["ICAO"])+ ", " +str(ae_ori["NOMBRE"])+", " +str(ae_ori["CIUDAD"])+", " +str(ae_ori["PAIS"]))
+    print("Aeropuerto de destino: "+str(ae_des["ICAO"])+", " +str(ae_des["NOMBRE"])+", " +str(ae_des["CIUDAD"])+", " +str(ae_des["PAIS"]))
+    print("Tiempo del trayecto (en min): "+str(tm_tot))
+    for i in lt.iterator(lst_vuelos):
+        print("--------------")
+        ae = i["vertexB"]
+        aero = mp.get(control["mapadistancias"], ae)["value"]
+        print("Aeropuerto de paso o final: "+str(aero["ICAO"])+", " +str(aero["NOMBRE"])+", " +str(aero["CIUDAD"])+", " +str(aero["PAIS"]))
 
 
 def print_req_2(control):

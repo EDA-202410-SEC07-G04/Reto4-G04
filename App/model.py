@@ -84,7 +84,8 @@ def new_data_structs():
             "listaVuelos": None,
             "caminos5": None,
             "caminos6": None,
-            "caminos7": None
+            "caminos7": None,
+            "caminos1": None
 
         }
     
@@ -519,15 +520,103 @@ def req_1(data_structs, p_origen, p_destino):
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
+    aero_ori_cer, aero_des_cer = aero_cercano(data_structs, p_origen, p_destino)
+    ae_ori = aero_ori_cer[0]
+    ae_des = aero_des_cer[0]
+    caminitor1(data_structs, aero_ori_cer[0]["ICAO"])
+    tot_aero_en_camino, lst_vuelos = destinitor1(data_structs, aero_des_cer[0]["ICAO"])
+    #print(tot_aero_en_camino)
+    #print(lst_vuelos)
+    tm_tot = 0
+    km_tot = int(aero_ori_cer[1]) + int(aero_des_cer[1])
+    listica = lt.newList("ARRAY_LIST")
+    if tot_aero_en_camino >= 2:
+        for i in lt.iterator(lst_vuelos):
+            km_tot += i["weight"]
+            llave = i["vertexA"] +"-"+ i["vertexB"]
+            vuelo = mp.get(data_structs["vuelos"], llave)["value"]
+            aer = mp.get(data_structs["mapadistancias"], i["vertexB"])["value"]
+            lt.addLast(listica, aer)
+            tm_tot += int(vuelo["TIEMPO_VUELO"])
+
+    elif tot_aero_en_camino < 2:
+        i = lt.firstElement(lst_vuelos)
+        km_tot += i["weight"]
+        llave = i["vertexA"] +"-"+ i["vertexB"]
+        vuelo = mp.get(data_structs["vuelos"], llave)["value"]
+        aer = mp.get(data_structs["mapadistancias"], i["vertexB"])["value"]
+        lt.addLast(listica, aer)
+        tm_tot += int(vuelo["TIEMPO_VUELO"]) 
+
+    tiempo = req_82(listica, ae_ori)
+    print(tiempo)
+
+    return km_tot, tot_aero_en_camino, lst_vuelos, tm_tot, ae_ori, ae_des
+
+    
+    
+
+def aero_cercano(data_structs, p_origen, p_destino, rango=30):
+    latitud_origen = p_origen[0]
+    longitud_origen = p_origen[1]
+    latitud_destino = p_destino[0]
+    longitud_destino = p_destino[1]
+
+    ori = (latitud_origen, longitud_origen)
+    des = (latitud_destino, longitud_destino)
+
+    aeros_ori = lt.newList("ARRAY_LIST")
+    aeros_des = lt.newList("ARRAY_LIST")
     for i in lt.iterator(data_structs["listaAeropuertos"]):
-        if i["LATITUD"] == p_origen[0] and i["LONGITUD"] == p_origen[1]:
-            icao_origen = i["ICAO"]
-        if i["LATITUD"] == p_destino[0] and i["LONGITUD"] == p_destino[1]:
-            icao_destino = i["ICAO"]
+        #print(i)
+        cord_aero = (float(i["LATITUD"].replace(",", ".")), float(i["LONGITUD"].replace(",", ".")))
+        distancia_origen = haversine(ori, cord_aero, unit=Unit.KILOMETERS)
+        distancia_destino = haversine(des, cord_aero, unit=Unit.KILOMETERS)
 
-    var1 = gr.getEdge(data_structs["aeropuertos"], icao_origen, icao_destino)
-    pass
+        if distancia_origen <= rango:
+            lt.addLast(aeros_ori, (i, distancia_origen))
+        
+        if distancia_destino <= rango:
+            lt.addLast(aeros_des, (i, distancia_destino))
 
+        merg.sort(aeros_ori, sort_r1)
+        merg.sort(aeros_des, sort_r1)
+
+        tama1 = lt.size(aeros_ori)
+        tama2 = lt.size(aeros_des)
+        if tama1 == 0 or tama2 == 0:
+            aero_ori_cer = (0,0)
+            aero_des_cer = (0,0)
+        else:
+            aero_ori_cer = lt.getElement(aeros_ori, 1)
+            aero_des_cer = lt.getElement(aeros_des, 1)
+
+    return aero_ori_cer, aero_des_cer
+
+def caminitor1(data_structs, ae):
+    data_structs["caminos1"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], ae)
+    return data_structs
+
+def destinitor1(data_structs, ae):
+    #caminito(data_structs, ae)
+    path = djk.pathTo(data_structs["caminos1"], ae)
+    #print(path)
+    lst = lt.newList("ARRAY_LIST")
+    if path is not None:
+        #print("messi")
+        pathlen = stack.size(path)
+        #print('El camino es de longitud: ' + str(pathlen))
+        while (not stack.isEmpty(path)):
+            stop = stack.pop(path)
+            lt.addLast(lst, stop)
+            #print(stop)
+            #print("------------------")
+    else:
+        pathlen = 0
+        stop = 0
+        print('No hay camino')
+    
+    return pathlen, lst
 
 def distancia_a_aero (data_structs, origen):
     lista_distancias = lt.newList("ARRAY_LIST")
@@ -1106,19 +1195,16 @@ def req_8(lst, ae):
     # TODO: Realizar el requerimiento 8
     start_time = get_time()
     
-    # Crear la ubicación inicial
     locacion = (float(ae["LATITUD"].replace(",", ".")), float(ae["LONGITUD"].replace(",", ".")))
     mapa = folium.Map(location=locacion, zoom_start=2)
     
-    # Añadir el marcador principal en color rojo
     folium.Marker(
         location=locacion,
         popup=f"<b>{ae['NOMBRE']}</b><br>Ciudad: {ae['CIUDAD']}",
         icon=folium.Icon(color='red')
     ).add_to(mapa)
 
-    # Añadir marcadores adicionales y dibujar líneas desde la ubicación principal
-    for i in lt.iterator(lst):  # Assuming lst is a list of dictionaries
+    for i in lt.iterator(lst): 
         longi = i["LONGITUD"].replace(",", ".")
         lati = i["LATITUD"].replace(",", ".")
         loca = (lati, longi)
@@ -1128,15 +1214,13 @@ def req_8(lst, ae):
             popup=f"<b>{i['NOMBRE']}</b><br>Ciudad: {i['CIUDAD']}"
         ).add_to(mapa)
         
-        # Dibujar la línea desde la ubicación principal a la ubicación actual
         folium.PolyLine(
             [locacion, loca],
-            color='blue',  # Color de la línea
-            weight=2,      # Grosor de la línea
-            opacity=0.6    # Opacidad de la línea
+            color='blue',  
+            weight=2,      
+            opacity=0.6    
         ).add_to(mapa)
 
-    # Guardar el mapa en un archivo HTML y abrirlo en el navegador
     mapa.save("mapa.html")
     webbrowser.open("mapa.html")
     
@@ -1144,30 +1228,48 @@ def req_8(lst, ae):
     deltaTime = delta_time(start_time, end_time)
     return deltaTime
 
-"""
-def req_8(lst, ae):
+def req_82(lst, ae):
     
     # TODO: Realizar el requerimiento 8
     start_time = get_time()
-    locacion = (ae["LATITUD"].replace(",", "."), ae["LONGITUD"].replace(",", "."))
+    
+    locacion = (float(ae["LATITUD"].replace(",", ".")), float(ae["LONGITUD"].replace(",", ".")))
     mapa = folium.Map(location=locacion, zoom_start=2)
-    folium.Marker(location=locacion, 
-                        popup=f"<b>{ae['NOMBRE']}</b><br>Ciudad: {ae['CIUDAD']}", icon=folium.Icon(color='red')).add_to(mapa)
+    
+    folium.Marker(
+        location=locacion,
+        popup=f"<b>{ae['NOMBRE']}</b><br>Ciudad: {ae['CIUDAD']}",
+        icon=folium.Icon(color='red')
+    ).add_to(mapa)
 
-    for i in lt.iterator(lst):
+    ul_locacion = locacion
+
+    for i in lt.iterator(lst): 
         longi = i["LONGITUD"].replace(",", ".")
-        lati= i["LATITUD"].replace(",", ".")
-
+        lati = i["LATITUD"].replace(",", ".")
         loca = (lati, longi)
-        folium.Marker(location=loca, 
-                        popup=f"<b>{i['NOMBRE']}</b><br>Ciudad: {i['CIUDAD']}").add_to(mapa)
+        
+        folium.Marker(
+            location=loca,
+            popup=f"<b>{i['NOMBRE']}</b><br>Ciudad: {i['CIUDAD']}"
+        ).add_to(mapa)
+        
+        folium.PolyLine(
+            [ul_locacion, loca],
+            color='blue',  
+            weight=2,      
+            opacity=0.6    
+        ).add_to(mapa)
+
+        ul_locacion = loca
 
     mapa.save("mapa.html")
     webbrowser.open("mapa.html")
+    
     end_time = get_time()
     deltaTime = delta_time(start_time, end_time)
     return deltaTime
-"""
+
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
@@ -1228,6 +1330,21 @@ def cmp_req6(x1, x2):
     cant1 = x1[1]
     cant2 = x2[1]
     if cant1 > cant2:
+        return True
+    elif cant1 == cant2:
+        if iata1 < iata2:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+def sort_r1(x1, x2):
+    iata1 = x1[0]["ICAO"]
+    iata2 = x2[0]["ICAO"]
+    cant1 = x1[1]
+    cant2 = x2[1]
+    if cant1 < cant2:
         return True
     elif cant1 == cant2:
         if iata1 < iata2:
