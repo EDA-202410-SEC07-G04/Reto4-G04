@@ -583,8 +583,7 @@ def req_2(data_structs, origen, destino):
     lista = recorrido["visited"]
     dict_recorrido = lista["table"]
     lista_recorrido = dict_recorrido["elements"]
-    print("lista recorrido")
-    print(lista_recorrido)
+
 
     if recorrido3["size"] == 1: #si no hay escalas 
         var = gr.getEdge(data_structs['aeropuertosHaversine'], icao_orien, icao_desti)
