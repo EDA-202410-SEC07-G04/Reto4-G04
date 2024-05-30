@@ -83,7 +83,8 @@ def new_data_structs():
             "aeropuertosHaversine": None,
             "listaVuelos": None,
             "caminos5": None,
-            "caminos6": None
+            "caminos6": None,
+            "caminos7": None
 
         }
     
@@ -637,8 +638,14 @@ def req_7(data_structs, long1, lat1, long2, lat2):
         jnd = lt.getElement(Haversine_ICAO_lst_ini, cont)
         jnd = jnd[1]
         #Dijkstra desde nom_ini (nombre vértice inicial) 
-        rta = djk.Dijkstra(data_structs["aeropuertos"], nom_ini)
+        #rta = djk.Dijkstra(data_structs["aeropuertos"], nom_ini)
+        caminito7(data_structs, nom_ini)
+        cant, lst = destinito7(data_structs, nom_fin)
+        print(cant)
+        print(lst)
         #confirmar que hya camino desde VerticeA hasta Vertice B (nom_fin)
+
+    """
         camino = djk.hasPathTo(rta, nom_fin)
         if camino is True:
             #significa que hay un camino, entonces tenerlo en cuenta 
@@ -650,8 +657,6 @@ def req_7(data_structs, long1, lat1, long2, lat2):
         #comprobar que el vuelo es comercial. Es comercial si durante el camino que recorre ese vuelo es comercial usando las llaves "ORIGEN"
         #for i in lt.iterator(recorrido):
             #a=1
-
-    """
 
 
 
@@ -686,7 +691,30 @@ def req_7(data_structs, long1, lat1, long2, lat2):
         if gr.getEdge()
    
 """
+def caminito7(data_structs, ae):
+    data_structs["caminos7"] = djk.Dijkstra(data_structs["aeropuertos"], ae)
+    return data_structs
 
+def destinito7(data_structs, ae):
+    #caminito(data_structs, ae)
+    path = djk.pathTo(data_structs["caminos7"], ae)
+    #print(path)
+    lst = lt.newList("ARRAY_LIST")
+    if path is not None:
+        #print("messi")
+        pathlen = stack.size(path)
+        #print('El camino es de longitud: ' + str(pathlen))
+        while (not stack.isEmpty(path)):
+            stop = stack.pop(path)
+            lt.addLast(lst, stop)
+            #print(stop)
+            #print("------------------")
+    else:
+        pathlen = 0
+        stop = 0
+        print('No hay camino')
+    
+    return pathlen, lst
 
 def req_8(lst, ae):
     """
