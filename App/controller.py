@@ -104,12 +104,16 @@ def get_data(control, id):
     pass
 
 
-def req_1(control):
+def req_1(control, p_origen, p_destino):
     """
     Retorna el resultado del requerimiento 1
     """
     # TODO: Modificar el requerimiento 1
-    pass
+    start_time = get_time()
+    km_tot, tot_aero_en_camino, lst_vuelos, tm_tot, ae_ori, ae_des = model.req_1(control, p_origen, p_destino)
+    end_time = get_time()
+    r1 = delta_time(start_time, end_time)
+    return r1, km_tot, tot_aero_en_camino, lst_vuelos, tm_tot, ae_ori, ae_des
 
 
 def req_2(control):
