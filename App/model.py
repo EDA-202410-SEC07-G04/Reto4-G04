@@ -597,10 +597,10 @@ def req_2(data_structs, origen, destino):
 
     if recorrido3["size"] == 1: #si no hay escalas 
         var = gr.getEdge(data_structs['aeropuertosHaversine'], icao_orien, icao_desti)
-        aeropuertos_visitados = 0
+        aeropuertos_visitados = 2
     else:
         var = bfs.pathTo(recorrido, icao_desti)
-        aeropuertos_visitados = lt.size(var)-1
+        aeropuertos_visitados = lt.size(var) 
 
 
     print (var)
