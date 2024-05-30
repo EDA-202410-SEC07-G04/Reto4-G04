@@ -278,7 +278,45 @@ def print_req_7(control, long1, lat1, long2, lat2):
     """
         Función que imprime la solución del Requerimiento 7 en consola
     """
-    controller.req_7(control, long1, lat1, long2, lat2)
+    rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia = controller.req_7(control, long1, lat1, long2, lat2)
+    if rtaa == 0:
+        print("Por favor, digite otros valores dado que su ubicación es más lejana a los 30km")
+    else:
+        print("EL tiempo de ejecucuión del algoritmo es: ")
+        print("Distancia origen - aeropuerto: ", str(d_ini))
+        print("Distancia destino - aeropuerto: ", str(d_fin))
+        print("Distancia recorrida entre trayectos: ", str(dist_tot))
+        tottt = d_ini + d_fin + dist_tot
+        print("Distancia total: ", str(tottt))
+        print("Número de aeropuertos que se visitan durante el trayecto: ", str(cant))
+        #secuencia de aeropuertos:
+        for i in lt.iterator(lst_secuencia):
+            llave = i.split("-")
+            origen = mp.get(control["mapadistancias"], llave[0])
+            origen1 = me.getValue(origen)
+            destino = mp.get(control["mapadistancias"], llave[1])
+            destino1 = me.getValue(destino)
+            #prints origen 
+            print("Aeropuerto origen: ")
+            print("      ICAO: ", origen1["ICAO"])
+            print("      Nombre: ", origen1["NOMBRE"])
+            print("      Ciudad: ", origen1["CIUDAD"])
+            print("      Pais: ", origen1["PAIS"])
+            #prints destino
+            print("Aeropuerto destino: ")
+            print("      ICAO: ", destino1["ICAO"])
+            print("      Nombre: ", destino1["NOMBRE"])
+            print("      Ciudad: ", destino1["CIUDAD"])
+            print("      Pais: ", destino1["PAIS"])
+
+            ##TIEMPO TRAY Y DIST TRAY 
+            tt = gr.getEdge(control["aeropuertos"], llave[0], llave[1])
+            
+            dd = gr.getEdge(control["aeropuertosHaversine"], llave[0], llave[1])
+            print("Tiempo trayecto: ", str(tt))
+            print("Distancia trayecto: ", str(dd))
+
+
 
 
 def print_req_8(control):

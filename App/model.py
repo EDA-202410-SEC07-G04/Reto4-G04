@@ -830,25 +830,55 @@ def req_7(data_structs, long1, lat1, long2, lat2):
     cont = 1
     jnd = lt.getElement(Haversine_ICAO_lst_ini, 1)
     jnd = jnd[1]
+    jnd1 = lt.getElement(Haversine_ICAO_lst_fin, 1)
+    jnd1 = jnd1[1]
     #así se asegura que la distancia es menor a 30 
-
-    while jnd < 30:
-        
-        #esto aegura que los aeropuertos seleccionados están a menos de 30km buscando desde el menor 
-        cont += 1
+    if jnd1 > 30 or jnd > 30:
+        rtaa = 0
+    else:
+        rtaa=1
         nom_ini = lt.getElement(Haversine_ICAO_lst_ini, cont)
         nom_ini = nom_ini[0]
         nom_fin = lt.getElement(Haversine_ICAO_lst_fin, cont)
         nom_fin = nom_fin[0]
-        jnd = lt.getElement(Haversine_ICAO_lst_ini, cont)
-        jnd = jnd[1]
+        #jnd = lt.getElement(Haversine_ICAO_lst_ini, cont)
+        #jnd = jnd[1]
         #Dijkstra desde nom_ini (nombre vértice inicial) 
         #rta = djk.Dijkstra(data_structs["aeropuertos"], nom_ini)
+
+        #retorna info del camino usando aeropuertos
         caminito7(data_structs, nom_ini)
         cant, lst = destinito7(data_structs, nom_fin)
-        print(cant)
-        print(lst)
+
+        #retorna info del camino usando aeropuertosHaversine para el trayecto del vuelo
+
+        caminito7_1(data_structs, nom_ini)
+        cant1, lst1 = destinito7_1(data_structs, nom_fin)
+    
+        tiempo_tot = lst["elements"][0]["weight"]
+        dist_tot = lst1["elements"][0]["weight"]
+        #numero aeropuertos es cant
+
+        #sacar la secuencia de aeropuertos
+        lst_secuencia = lt.newList(datastructure="ARRAY_LIST")
+        for final in lt.iterator(lst):
+            vert_A = final["vertexA"]
+            vert_B = final["vertexB"]
+            llave = vert_A +"-"+vert_B
+            lt.addLast(lst_secuencia,llave)
+    return rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia
+    
+    
+
+
+
+        #print(cant)
+        #print(lst)
         #confirmar que hya camino desde VerticeA hasta Vertice B (nom_fin)
+
+    #tiempo y distancia total del camino
+    #tiempo = djk.distTo()
+
 
     """
         camino = djk.hasPathTo(rta, nom_fin)
@@ -901,6 +931,32 @@ def caminito7(data_structs, ae):
     return data_structs
 
 def destinito7(data_structs, ae):
+    #caminito(data_structs, ae)
+    path = djk.pathTo(data_structs["caminos7"], ae)
+    #print(path)
+    lst = lt.newList("ARRAY_LIST")
+    if path is not None:
+        #print("messi")
+        pathlen = stack.size(path)
+        #print('El camino es de longitud: ' + str(pathlen))
+        while (not stack.isEmpty(path)):
+            stop = stack.pop(path)
+            lt.addLast(lst, stop)
+            #print(stop)
+            #print("------------------")
+    else:
+        pathlen = 0
+        stop = 0
+        print('No hay camino')
+    
+    return pathlen, lst
+
+
+def caminito7_1(data_structs, ae):
+    data_structs["caminos7"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], ae)
+    return data_structs
+
+def destinito7_1(data_structs, ae):
     #caminito(data_structs, ae)
     path = djk.pathTo(data_structs["caminos7"], ae)
     #print(path)

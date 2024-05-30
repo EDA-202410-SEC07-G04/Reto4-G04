@@ -167,8 +167,8 @@ def req_7(control, long1, lat1, long2, lat2):
     """
     Retorna el resultado del requerimiento 7
     """
-    model.req_7(control, long1, lat1, long2, lat2)
-
+    rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia = model.req_7(control, long1, lat1, long2, lat2)
+    return rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia
 
 def req_8(control):
     """
