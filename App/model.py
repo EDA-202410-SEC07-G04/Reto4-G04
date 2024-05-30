@@ -678,6 +678,7 @@ def req_2(data_structs, origen, destino):
         var = gr.getEdge(data_structs['aeropuertosHaversine'], icao_orien, icao_desti)
         lt.addLast(listi, var)
         aeropuertos_visitados = 2
+        distancia_vuelo = var["weight"]
     else:
         var = bfs.pathTo(recorrido, icao_desti)
         lt.addLast(listi, var)
@@ -685,7 +686,7 @@ def req_2(data_structs, origen, destino):
 
 
     #print(listi)
-    distancia_vuelo = var["weight"]
+    
 
 
 
