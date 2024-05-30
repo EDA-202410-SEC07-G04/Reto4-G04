@@ -693,7 +693,7 @@ def req_2(data_structs, origen, destino):
         distancia_total = dist_org_aeroi[0] + dist_des_aerof[0] + distancia_vuelo
 
     else: 
-        distancia_total = dist_org_aeroi
+        distancia_total = haversine(origen, destino)
         aeropuertos_visitados = "No se realizo el recorrido"
         recorrido3 = "No se realizo el recorrido"
         
