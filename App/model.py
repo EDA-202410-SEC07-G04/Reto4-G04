@@ -578,16 +578,7 @@ def req_2(data_structs, origen, destino):
     recorrido = bfs.BreathFirstSearch(data_structs['aeropuertosHaversine'], icao_orien) #dict
     recorrido2 = djk.Dijkstra(data_structs['aeropuertosHaversine'], icao_orien)
     recorrido3 = djk.pathTo(recorrido2, icao_desti) #recorrido entre aeropuertos
-    print("RECORRIDO 3")
-    print(recorrido3)
     lista_vert_relacionados = recorrido2["iminpq"]["elements"]
-    print("lista_vert_relacionados")
-    print(lista_vert_relacionados)
-
-    print("RECORRIDO")
-    print(recorrido)
-    #print("RECORRIDO2")
-    #print(recorrido2)
 
     lista = recorrido["visited"]
     dict_recorrido = lista["table"]
