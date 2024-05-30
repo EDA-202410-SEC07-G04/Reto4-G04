@@ -68,11 +68,13 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    controller.load_data(control)
+    control, militar_defi, carga_defi, comerciales_defi = controller.load_data(control)
     espe = mp.get(control["vuelos"], "SKMD-SKVP")
     #print(control["aeropuertos"])
     cr7 = gr.numEdges(control["aeropuertos"])
     print(cr7)
+    print("El total de aeropuertos es: ", int(gr.numVertices(control["aeropuertos"])))
+    print("El total de vuelos cargados del archivo es de: ", int(lt.size(control["listaVuelos"])))
     #print(mp.size(control["vuelos"]))
     #print(mp.get(control["vuelos"], "BIKF-SKCL"))
     #print(espe)
@@ -93,6 +95,43 @@ def load_data(control):
     #print(mp.keySet(control["mapadistancias"]))
     #print(mp.get(control["mapadistancias"], "MYAM"))
     #print(vertices)
+
+    ##prints usando mapadistancias
+    #comercial
+    for i in lt.iterator(comerciales_defi):
+        nombre = i[0]
+        cnc = i[1]
+        dataa = mp.get(control["mapadistancias"], nombre)
+        dataa2 = me.getValue(dataa)
+        print("Nombre aeropuerto: ", dataa2["NOMBRE"])
+        print("ICAO: ", dataa2["ICAO"])
+        print("Ciudad: ", dataa2["CIUDAD"])
+        print("Concurrencia comercial: ", cnc)
+        print("-----------------------------------------")
+
+    #carga
+    for i in lt.iterator(carga_defi):
+        nombre = i[0]
+        cnc = i[1]
+        dataa = mp.get(control["mapadistancias"], nombre)
+        dataa2 = me.getValue(dataa)
+        print("Nombre aeropuerto: ", dataa2["NOMBRE"])
+        print("ICAO: ", dataa2["ICAO"])
+        print("Ciudad: ", dataa2["CIUDAD"])
+        print("Concurrencia comercial: ", cnc)
+        print("-----------------------------------------")
+
+    #militar
+    for i in lt.iterator(militar_defi):
+        nombre = i[0]
+        cnc = i[1]
+        dataa = mp.get(control["mapadistancias"], nombre)
+        dataa2 = me.getValue(dataa)
+        print("Nombre aeropuerto: ", dataa2["NOMBRE"])
+        print("ICAO: ", dataa2["ICAO"])
+        print("Ciudad: ", dataa2["CIUDAD"])
+        print("Concurrencia comercial: ", cnc)
+        print("-----------------------------------------")
 
 def pruebas(control):
     #BOG 74

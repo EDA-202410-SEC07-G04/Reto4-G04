@@ -175,7 +175,212 @@ def addAeropuertoConnection(control):
         addAeropuertoHaversineNodiri(control, nodoida)
         addAeropuertoHaversineNodiri(control, nodovuelta)
         addConeccionHaversineNodiri(control, nodoida, nodovuelta, dhaver)
-    return control
+    
+    ## prints carga de datos 
+    #comerciales
+    comerciales = lt.newList(datastructure="ARRAY_LIST")
+    nombre = gr.vertices(control["aeropuertos"])
+    for i in lt.iterator(nombre):
+        #size = lt.size(control["listaAeropuertos"])
+        #nombre = lt.getElement(control["listaAeropuertos"], i+1)
+        numero = lt.size(gr.adjacents(control["aeropuertos"], i))
+        ltt = [i, numero,]
+        lt.addLast(comerciales, ltt)
+    #definir ahora que sean vuelos comerciales
+    #usar listaVuelos y comprobar que el vértice de de ORIGEN o DESTINO sea alguno de los que se filtraron y 
+    #comprobar el número de vuelos comerciales 
+    comerciales1 = mp.newMap(numelements=428, maptype='PROBING',cmpfunction=compararorigen)
+    for j in lt.iterator(control["listaVuelos"]):
+        if j["TIPO_VUELO"] == "AVIACION_COMERCIAL":
+            origen = j["ORIGEN"]
+            destino = j["DESTINO"]
+
+            #verificar que destino y origen estén en el mapa, primero agregarlos al mapa
+
+            if mp.contains(comerciales1,origen) is False:
+                cont_origen = 1
+                mp.put(comerciales1,origen,cont_origen)
+            else:
+                #ya está la info en el mapa, actualizar valor
+                cont_origen2 = mp.get(comerciales1, origen)
+                cont_origen3 = me.getValue(cont_origen2)
+                cont_origen3 += 1
+                mp.put(comerciales1,origen,cont_origen3)
+
+            # Lo mismo para el destino 
+
+            if mp.contains(comerciales1,destino) is False:
+                cont_destino = 1
+                mp.put(comerciales1,destino,cont_destino)
+            else:
+                #ya está la info en el mapa, actualizar valor
+                cont_destino2 = mp.get(comerciales1, destino)
+                cont_destino3 = me.getValue(cont_destino2)
+                cont_destino3 += 1
+                mp.put(comerciales1,destino,cont_destino3)
+
+    # ya con los datos en el map, pasarlos a una lista para encontrar los 5 primeros y los 5 últimos
+
+    comerciales_lista = mp.keySet(comerciales1)
+    comerciales_defi = lt.newList(datastructure="ARRAY_LIST")
+    for nn in lt.iterator(comerciales_lista):
+        
+        concurrencia = mp.get(comerciales1, nn) 
+        concurrencia2 = me.getValue(concurrencia)
+        lt_comerciales = [nn, concurrencia2]
+        lt.addLast(comerciales_defi,lt_comerciales )
+    
+    #hacer merge para encontrar los buscados 
+
+    merg.sort(comerciales_defi, cmp_carga) #comerciales_defi son los organizados 
+
+    #Carga
+    carga = lt.newList(datastructure="ARRAY_LIST")
+    nombre = gr.vertices(control["aeropuertos"])
+    for i in lt.iterator(nombre):
+        #size = lt.size(control["listaAeropuertos"])
+        #nombre = lt.getElement(control["listaAeropuertos"], i+1)
+        numero = lt.size(gr.adjacents(control["aeropuertos"], i))
+        ltt = [i, numero,]
+        lt.addLast(carga, ltt)
+    #definir ahora que sean vuelos comerciales
+    #usar listaVuelos y comprobar que el vértice de de ORIGEN o DESTINO sea alguno de los que se filtraron y 
+    #comprobar el número de vuelos comerciales 
+    carga1 = mp.newMap(numelements=428, maptype='PROBING',cmpfunction=compararorigen)
+    for j in lt.iterator(control["listaVuelos"]):
+        if j["TIPO_VUELO"] == "AVIACION_CARGA":
+            origen = j["ORIGEN"]
+            destino = j["DESTINO"]
+
+            #verificar que destino y origen estén en el mapa, primero agregarlos al mapa
+
+            if mp.contains(carga1,origen) is False:
+                cont_origen = 1
+                mp.put(carga1,origen,cont_origen)
+            else:
+                #ya está la info en el mapa, actualizar valor
+                cont_origen2 = mp.get(carga1, origen)
+                cont_origen3 = me.getValue(cont_origen2)
+                cont_origen3 += 1
+                mp.put(carga1,origen,cont_origen3)
+
+            # Lo mismo para el destino 
+
+            if mp.contains(carga1,destino) is False:
+                cont_destino = 1
+                mp.put(carga1,destino,cont_destino)
+            else:
+                #ya está la info en el mapa, actualizar valor
+                cont_destino2 = mp.get(carga1, destino)
+                cont_destino3 = me.getValue(cont_destino2)
+                cont_destino3 += 1
+                mp.put(carga1,destino,cont_destino3)
+
+    # ya con los datos en el map, pasarlos a una lista para encontrar los 5 primeros y los 5 últimos
+
+    carga_lista = mp.keySet(carga1)
+    carga_defi = lt.newList(datastructure="ARRAY_LIST")
+    for nn in lt.iterator(carga_lista):
+        
+        concurrencia = mp.get(carga1, nn) 
+        concurrencia2 = me.getValue(concurrencia)
+        lt_comerciales = [nn, concurrencia2]
+        lt.addLast(carga_defi,lt_comerciales )
+    
+    #hacer merge para encontrar los buscados 
+
+    merg.sort(carga_defi, cmp_carga) #carga_defi son los organizados 
+
+
+    #Militar
+
+
+    militar = lt.newList(datastructure="ARRAY_LIST")
+    nombre = gr.vertices(control["aeropuertos"])
+    for i in lt.iterator(nombre):
+        #size = lt.size(control["listaAeropuertos"])
+        #nombre = lt.getElement(control["listaAeropuertos"], i+1)
+        numero = lt.size(gr.adjacents(control["aeropuertos"], i))
+        ltt = [i, numero,]
+        lt.addLast(militar, ltt)
+    #definir ahora que sean vuelos comerciales
+    #usar listaVuelos y comprobar que el vértice de de ORIGEN o DESTINO sea alguno de los que se filtraron y 
+    #comprobar el número de vuelos comerciales 
+    militar1 = mp.newMap(numelements=428, maptype='PROBING',cmpfunction=compararorigen)
+    for j in lt.iterator(control["listaVuelos"]):
+        if j["TIPO_VUELO"] == "MILITAR":
+            origen = j["ORIGEN"]
+            destino = j["DESTINO"]
+
+            #verificar que destino y origen estén en el mapa, primero agregarlos al mapa
+
+            if mp.contains(militar1,origen) is False:
+                cont_origen = 1
+                mp.put(militar1,origen,cont_origen)
+            else:
+                #ya está la info en el mapa, actualizar valor
+                cont_origen2 = mp.get(militar1, origen)
+                cont_origen3 = me.getValue(cont_origen2)
+                cont_origen3 += 1
+                mp.put(militar1,origen,cont_origen3)
+
+            # Lo mismo para el destino 
+
+            if mp.contains(militar1,destino) is False:
+                cont_destino = 1
+                mp.put(militar1,destino,cont_destino)
+            else:
+                #ya está la info en el mapa, actualizar valor
+                cont_destino2 = mp.get(militar1, destino)
+                cont_destino3 = me.getValue(cont_destino2)
+                cont_destino3 += 1
+                mp.put(militar1,destino,cont_destino3)
+
+    # ya con los datos en el map, pasarlos a una lista para encontrar los 5 primeros y los 5 últimos
+
+    militar_lista = mp.keySet(militar1)
+    militar_defi = lt.newList(datastructure="ARRAY_LIST")
+    for nn in lt.iterator(militar_lista):
+        
+        concurrencia = mp.get(militar1, nn) 
+        concurrencia2 = me.getValue(concurrencia)
+        lt_comerciales = [nn, concurrencia2]
+        lt.addLast(militar_defi,lt_comerciales )
+    
+    #hacer merge para encontrar los buscados 
+
+    merg.sort(militar_defi, cmp_carga) #militar_defi son los organizados 
+
+    # dejar los 5 primeros y úlimos por cada tipo de vuelo
+    mili_defi = lt.newList(datastructure="ARRAY_LIST")
+    crg_defi = lt.newList(datastructure="ARRAY_LIST")
+    com_defi = lt.newList(datastructure="ARRAY_LIST")
+    len_mili = lt.size(militar_defi)
+    len_crg = lt.size(carga_defi)
+    len_com = lt.size(comerciales_defi)
+    for i in range(5): #primeros 5 
+        lt.addLast(mili_defi, lt.getElement(militar_defi, i+1))
+        lt.addLast(crg_defi, lt.getElement(carga_defi, i+1))
+        lt.addLast(com_defi, lt.getElement(comerciales_defi, i+1))
+    
+    for k in range(5):
+        lt.addLast(mili_defi, lt.getElement(militar_defi, len_mili-4+k))
+        lt.addLast(crg_defi, lt.getElement(carga_defi, len_crg-4+k))
+        lt.addLast(com_defi, lt.getElement(comerciales_defi, len_com-4+k))
+
+        
+    return control, mili_defi, crg_defi, com_defi
+
+
+def cmp_carga(da, db)  :
+    di = da[1]
+    df = db[1]
+    if di < df:
+        return False
+    elif di > df:
+        return True
+    else:
+        True
    
 def conversion(v1, v2):
     #print(v1)

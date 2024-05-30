@@ -49,7 +49,8 @@ def load_data(control):
     # TODO: Realizar la carga de datos
     load_flights(control)
     load_airports(control)
-    model.addAeropuertoConnection(control)
+    control, militar_defi, carga_defi, comerciales_defi = model.addAeropuertoConnection(control)
+    return control, militar_defi, carga_defi, comerciales_defi
     
 
 def load_airports(control):
