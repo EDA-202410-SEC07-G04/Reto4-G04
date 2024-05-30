@@ -335,16 +335,18 @@ def print_req_7(control, long1, lat1, long2, lat2):
     """
         Función que imprime la solución del Requerimiento 7 en consola
     """
-    rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia = controller.req_7(control, long1, lat1, long2, lat2)
+    rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia, nom_ini = controller.req_7(control, long1, lat1, long2, lat2)
     if rtaa == 0:
         print("Por favor, digite otros valores dado que su ubicación es más lejana a los 30km")
     else:
-        print("EL tiempo de ejecucuión del algoritmo es: ")
+        print("El aeropuerto origen es de: ", nom_ini)
+        print("El tiempo de ejecucuión del algoritmo es: ")
         print("Distancia origen - aeropuerto: ", str(d_ini))
         print("Distancia destino - aeropuerto: ", str(d_fin))
         print("Distancia recorrida entre trayectos: ", str(dist_tot))
         tottt = d_ini + d_fin + dist_tot
         print("Distancia total: ", str(tottt))
+        print("El tiempo total es de: ", str(tiempo_tot))
         print("Número de aeropuertos que se visitan durante el trayecto: ", str(cant))
         #secuencia de aeropuertos:
         for i in lt.iterator(lst_secuencia):
