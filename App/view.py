@@ -178,14 +178,71 @@ def print_req_2(control):
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
-    pass
 
+    latitud_origen = float(input("Ingrese la latitud de origen: "))
+    longitud_origen = float(input("Ingrese la longitud de origen: "))
+    origen = latitud_origen, longitud_origen
+    latidud_destino = float(input("Ingrese la latitud de destino: "))
+    longitud_destino = float(input("Ingrese la longitud de destino: "))
+    destino= latidud_destino, longitud_destino
+
+    distancia_total, aeropuertos_visitados, info_origen, info_destino,lista_vert_relacionados, deltaTime = controller.req_2(control, origen, destino)
+    DeltaTime = f"{deltaTime:.3f}"
+
+
+    print("El tiempo de ejecución es: ", str(DeltaTime), "[ms]")
+    print("La distancia desde el punto de origen al punto de destino es: ", str(distancia_total))
+    print("El numero de aeropuertos visitados es", str(aeropuertos_visitados))
+    print("El camino es: ")
+    print("Aeropuerto de origen: ", str(info_origen["ICAO"]) ,str( info_origen["NOMBRE"]) , str (info_origen["CIUDAD"]) , str(info_origen["PAIS"]))
+    print("Aeropuerto de destino:", str(info_destino["ICAO"]) ,str(info_destino["NOMBRE"]) , str(info_destino["CIUDAD"]) , str(info_destino["PAIS"]))
+
+    for ii in lt.iterator(lista_vert_relacionados):
+            llave = info_origen["ICAO"] + "-" + info_destino["ICAO"]
+            eiu = gr.getEdge(control["aeropuertosHaversine"],info_origen["ICAO"], info_destino["ICAO"])
+            valor = mp.get(control["vuelos"], llave)
+            if valor is not None:
+                valor2 = valor["value"]
+                #en valor están los encabezados de flights
+                print("       Aeropuerto origen: ", valor2["ORIGEN"])
+                print("       Aeropuerto destino: ", valor2["DESTINO"])
+                """if len(ii) != 1:
+                    print("       Aeropuertos intermedios: ", ii)"""
+                print("       Tiempo trayecto: ", valor2["TIEMPO_VUELO"])
+                print("----------------------------")
 
 def print_req_3(control):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 3
+    informacion_ae, suma_recorridos, total_tayectos,aero_conectados,  deltaTime = controller.req_3(control)
+    DeltaTime = f"{deltaTime:.3f}"
+
+    print("El tiempo de ejecución es: ", str(DeltaTime), "[ms]")
+    print("El aeropuerto más grande según la concurrencia comercial es: ")
+    print ("ICAO: ", str(informacion_ae[0]))
+    print ("NOMBRE: ", str(informacion_ae[1]))
+    print ("CIUDAD: ", str(informacion_ae[2]))
+    print ("PAIS: ", str(informacion_ae[3]))
+    print ("Concurrencia comerical: ", str(informacion_ae[4]))
+    print("Distancia total de los trayectos", str(suma_recorridos), "km")
+    print("Número total de trayectos", str(total_tayectos))
+
+
+    for ii in lt.iterator(aero_conectados):
+            llave = informacion_ae[0] + "-" + ii["key"]
+            eiu = gr.getEdge(control["aeropuertosHaversine"],informacion_ae[0], ii["key"])
+            valor = mp.get(control["vuelos"], llave)
+            if valor is not None:
+                valor2 = valor["value"]
+                #en valor están los encabezados de flights
+                print("       Aeropuerto origen: ", valor2["ORIGEN"])
+                print("       Aeropuerto destino: ", valor2["DESTINO"])
+                print("       Distancia recorrida: ", ii["index"])
+                print("       Tiempo trayecto: ", valor2["TIEMPO_VUELO"])
+                print("----------------------------")
+
     pass
 
 

@@ -115,6 +115,13 @@ def new_data_structs():
 
         control["listaVuelos"] = lt.newList("ARRAY_LIST")
 
+        control["grafo_no_dirigido_3"] = gr.newGraph(datastructure="ADJ_LIST",
+                                                     directed=False,
+                                                     size = 428,
+                                                     cmpfunction=compararAeropuertos)
+        control["mapa_vuelos"] = mp.newMap(numelements=428, 
+                                           maptype="PROBING")
+
         return control
     except Exception as exp:
         error.reraise(exp, 'model:new_data_structs')
@@ -469,6 +476,22 @@ def addConeccionHaversine(control, origen, destino, distancia):
         gr.addEdge(control["aeropuertosHaversine"], origen, destino, distancia)
     return control
 
+def addAeropuerto_no (control, aeropuerto):
+    gr.insertVertex(control["grafo_no_dirigido_3"], aeropuerto["ICAO"])
+    return control
+
+def addVuelo_no_dirigido (control, origen, destino, distancia):
+    tupla = origen, destino
+    mp.put(control["mapa_vuelos"], tupla, distancia)
+
+    tuplainver= destino, origen
+    
+
+    if mp.contains(control["mapa_vuelos"], tuplainver ):
+        gr.addEdge(control["grafo_no_dirigido_3"], origen, destino, distancia)
+    
+    return control
+
 def addConeccionHaversineNodiri(control, origen, destino, distancia):
     edge = gr.getEdge(control["aeropuertosHaversineNodiri"], origen, destino)
     if edge is None:
@@ -506,11 +529,81 @@ def req_1(data_structs, p_origen, p_destino):
     pass
 
 
-def req_2(data_structs):
+def distancia_a_aero (data_structs, origen):
+    lista_distancias = lt.newList("ARRAY_LIST")
+
+    for i in lt.iterator(data_structs["listaAeropuertos"]): #para el aeropuerto más cercano de origen
+        latitud_aero = i["LATITUD"].replace(',', '.')
+        latitud_aero = float(latitud_aero)
+        longitud_aero = i["LONGITUD"].replace(',', '.')
+        longitud_aero = float(longitud_aero)
+
+        tupla = latitud_aero, longitud_aero
+
+        identificador = haversine(origen, tupla)
+        valores = i, identificador #i es el ICAO
+        lt.addLast(lista_distancias, valores)
+    
+    mayor = 99999
+    menor_aero = None
+    for i in lt.iterator(lista_distancias):
+        icao, distancia = i
+        if distancia <= mayor:
+            mayor = distancia
+            menor_aero = icao
+        
+        if mayor < 30:
+            aeropuerto_or = mayor, menor_aero
+    print("Aeropuerto or")
+    print(aeropuerto_or)
+    return aeropuerto_or
+
+
+def req_2(data_structs, origen, destino):
     """
     Función que soluciona el requerimiento 2
     """
     # TODO: Realizar el requerimiento 2
+
+    #distancia del lugar de origen al aeropuerto más cercano
+    dist_org_aeroi = distancia_a_aero(data_structs, origen)
+    icao_orien = dist_org_aeroi[1]["ICAO"]
+    info_origen = dist_org_aeroi[1]
+    #distancia destino al aeropuerto más cercano
+    dist_des_aerof = distancia_a_aero(data_structs, destino)
+    icao_desti = dist_des_aerof[1]["ICAO"]
+    info_destino = dist_des_aerof[1]
+
+    #camino entre los dos aeropuertos
+    recorrido = bfs.BreathFirstSearch(data_structs['aeropuertosHaversine'], icao_orien) #dict
+    recorrido2 = djk.Dijkstra(data_structs['aeropuertosHaversine'], icao_orien)
+    recorrido3 = djk.pathTo(recorrido2, icao_desti) #recorrido entre aeropuertos
+    lista_vert_relacionados = recorrido2["iminpq"]["elements"]
+
+    lista = recorrido["visited"]
+    dict_recorrido = lista["table"]
+    lista_recorrido = dict_recorrido["elements"]
+
+
+    if recorrido3["size"] == 1: #si no hay escalas 
+        var = gr.getEdge(data_structs['aeropuertosHaversine'], icao_orien, icao_desti)
+        aeropuertos_visitados = 2
+    else:
+        var = bfs.pathTo(recorrido, icao_desti)
+        aeropuertos_visitados = lt.size(var) 
+
+
+    print (var)
+    distancia_vuelo = var["weight"]
+
+
+
+    distancia_total = dist_org_aeroi[0] + dist_des_aerof[0] + distancia_vuelo
+
+    
+
+    return distancia_total, aeropuertos_visitados, info_origen, info_destino, recorrido3
+
     pass
 
 
@@ -519,7 +612,35 @@ def req_3(data_structs):
     Función que soluciona el requerimiento 3
     """
     # TODO: Realizar el requerimiento 3
-    pass
+
+    #Filtrar los vuelos solo comercialaes
+    comerciales = r61(data_structs)
+    aero, numero_vuelos = r52(comerciales)
+    info_aero = mp.get(data_structs["mapadistancias"], str(aero)) #informacion del aeropuerto
+   # print(info_aero)
+    codigo_ae = info_aero["value"]["ICAO"]
+    ruta = djk.Dijkstra(data_structs["aeropuertosHaversine"], codigo_ae)
+    aero_conectados = ruta["iminpq"]["elements"] #aeropuertos (vertices) conectados al aeropuerto de mayor importancia
+    #print(aero_conectados)
+    informacion_ae = info_aero["value"]["ICAO"], info_aero["value"]["NOMBRE"], info_aero["value"]["CIUDAD"], info_aero["value"]["PAIS"], numero_vuelos
+
+    suma_recorridos = 0
+    for i in lt.iterator(aero_conectados):
+        suma_recorridos+=i["index"]
+    
+
+    ae = mp.get(data_structs["mapadistancias"], info_aero["key"])["value"]
+    #print(ae)
+
+    lst = lt.newList("ARRAY_LIST")
+    for i in lt.iterator(aero_conectados):
+        ele = mp.get(data_structs["mapadistancias"], i["key"])["value"]
+        lt.addLast(lst, ele)
+
+    req8 = req_8(lst, ae)
+
+
+    return  informacion_ae, suma_recorridos, lt.size(aero_conectados), aero_conectados
 
 def cmp_req4(da, db)  :
     di = da[1]

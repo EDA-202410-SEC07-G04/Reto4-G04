@@ -113,11 +113,16 @@ def req_1(control):
     pass
 
 
-def req_2(control):
+def req_2(control, origen, destino):
     """
     Retorna el resultado del requerimiento 2
     """
     # TODO: Modificar el requerimiento 2
+    start_time = get_time()
+    distancia_total, aeropuertos_visitados, info_origen, info_destino, lista_vert_relacionados = model.req_2(control, origen, destino)
+    end_time = get_time()
+    deltaTime = delta_time(start_time, end_time)
+    return distancia_total, aeropuertos_visitados, info_origen, info_destino, lista_vert_relacionados, deltaTime
     pass
 
 
@@ -126,6 +131,11 @@ def req_3(control):
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
+    start_time = get_time()
+    informacion_ae, suma_recorridos, total_tayectos, aero_conectados = model.req_3(control)
+    end_time = get_time()
+    deltaTime = delta_time(start_time, end_time)
+    return informacion_ae, suma_recorridos, total_tayectos,aero_conectados, deltaTime
     pass
 
 
