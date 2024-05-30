@@ -815,6 +815,15 @@ def req_4(data_structs):
     ##stop_time = time.get_time()
     # calculando la diferencia en tiempo
     ##delta_Time = time.delta_time(start_time, stop_time)
+    
+    impo = mp.get(data_structs["mapadistancias"], ICAO_busc)["value"]
+
+    fini = lt.newList("ARRAY_LIST")
+    for i in lt.iterator(lista_vert_relacionados):
+        messi = mp.get(data_structs["mapadistancias"], i["key"])["value"]
+        lt.addLast(fini, messi)
+
+    tiempo = req_8(fini, impo)
 
     return ICAO_busc, tot_busc, dist_busc, nom_busc, ciudad_busc, pais_busc, trayectos_posibles_tot, lista_vert_relacionados
 
@@ -835,7 +844,9 @@ def req_5(data_structs):
 
 
     varsi = r51(data_structs)
-    aeropuerto, cant = r52(varsi)
+    mbappe = r53(varsi)
+    variuuu = lt.firstElement(mbappe)
+    aeropuerto, cant = variuuu
     r2 = mp.get(data_structs["mapadistancias"], str(aeropuerto))
     data_structs["caminos5"] = djk.Dijkstra(data_structs["aeropuertosHaversine"], r2["value"]["ICAO"])
     r5 = (data_structs["caminos5"]["iminpq"]["elements"])
@@ -889,7 +900,15 @@ def r52(salidas):
 
     return aero, max_vuelos
 
+def r53(salidas):
+    final = lt.newList("ARRAY_LIST")
+    finalissima = lt.newList("ARRAY_LIST")
+    for x, y in salidas.items():
+        tot_vue = y["salidas"] + y["llegadas"]
+        lt.addLast(final, (x, tot_vue))
 
+    finalissima = merg.sort(final, cmp_req6)
+    return finalissima
 
 
 def req_6(data_structs, c_aero):
@@ -1249,47 +1268,43 @@ def req_8(lst, ae):
     return deltaTime
 
 def req_82(lst, ae):
-    
-    # TODO: Realizar el requerimiento 8
+    """ Función que soluciona el requerimiento 8 """
     start_time = get_time()
-    
     locacion = (float(ae["LATITUD"].replace(",", ".")), float(ae["LONGITUD"].replace(",", ".")))
     mapa = folium.Map(location=locacion, zoom_start=2)
-    
+
     folium.Marker(
         location=locacion,
         popup=f"<b>{ae['NOMBRE']}</b><br>Ciudad: {ae['CIUDAD']}",
         icon=folium.Icon(color='red')
     ).add_to(mapa)
 
-    ul_locacion = locacion
+    prev_loca = locacion
+    for i in lt.iterator(lst):
 
-    for i in lt.iterator(lst): 
-        longi = i["LONGITUD"].replace(",", ".")
-        lati = i["LATITUD"].replace(",", ".")
+        longi = float(i["LONGITUD"].replace(",", "."))
+        lati = float(i["LATITUD"].replace(",", "."))
         loca = (lati, longi)
-        
+
         folium.Marker(
             location=loca,
             popup=f"<b>{i['NOMBRE']}</b><br>Ciudad: {i['CIUDAD']}"
         ).add_to(mapa)
-        
+
         folium.PolyLine(
-            [ul_locacion, loca],
-            color='blue',  
-            weight=2,      
-            opacity=0.6    
+            [prev_loca, loca],
+            color='blue',
+            weight=2,
+            opacity=0.6
         ).add_to(mapa)
 
-        ul_locacion = loca
+        prev_loca = loca
 
     mapa.save("mapa.html")
     webbrowser.open("mapa.html")
-    
     end_time = get_time()
     deltaTime = delta_time(start_time, end_time)
     return deltaTime
-
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista

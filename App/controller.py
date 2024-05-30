@@ -180,8 +180,11 @@ def req_7(control, long1, lat1, long2, lat2):
     """
     Retorna el resultado del requerimiento 7
     """
+    start_time = get_time()
     rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia, nom_ini_fin = model.req_7(control, long1, lat1, long2, lat2)
-    return rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia, nom_ini_fin
+    end_time = get_time()
+    r1 = delta_time(start_time, end_time)
+    return r1, rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia, nom_ini_fin
 
 def req_8(control):
     """
