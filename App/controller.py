@@ -127,7 +127,6 @@ def req_2(control, origen, destino):
     end_time = get_time()
     deltaTime = delta_time(start_time, end_time)
     return distancia_total, aeropuertos_visitados, info_origen, info_destino, lista_vert_relacionados, deltaTime
-    pass
 
 
 def req_3(control):

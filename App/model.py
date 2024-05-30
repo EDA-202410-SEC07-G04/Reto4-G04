@@ -643,8 +643,8 @@ def distancia_a_aero (data_structs, origen):
         
         if mayor < 30:
             aeropuerto_or = mayor, menor_aero
-    print("Aeropuerto or")
-    print(aeropuerto_or)
+    #print("Aeropuerto or")
+    #print(aeropuerto_or)
     return aeropuerto_or
 
 
@@ -673,27 +673,35 @@ def req_2(data_structs, origen, destino):
     dict_recorrido = lista["table"]
     lista_recorrido = dict_recorrido["elements"]
 
-
+    listi = lt.newList("ARRAY_LIST")
     if recorrido3["size"] == 1: #si no hay escalas 
         var = gr.getEdge(data_structs['aeropuertosHaversine'], icao_orien, icao_desti)
+        lt.addLast(listi, var)
         aeropuertos_visitados = 2
     else:
         var = bfs.pathTo(recorrido, icao_desti)
+        lt.addLast(listi, var)
         aeropuertos_visitados = lt.size(var) 
 
 
-    print (var)
+    #print(listi)
     distancia_vuelo = var["weight"]
 
 
 
     distancia_total = dist_org_aeroi[0] + dist_des_aerof[0] + distancia_vuelo
 
+    #print(recorrido3)
+    fini = lt.newList("ARRAY_LIST")
+    for i in lt.iterator(listi):
+        aero = mp.get(data_structs["mapadistancias"], i["vertexB"])["value"]
+        lt.addLast(fini, aero)
+
     
+    tiempo = req_82(fini, dist_org_aeroi[1])
 
     return distancia_total, aeropuertos_visitados, info_origen, info_destino, recorrido3
 
-    pass
 
 
 def req_3(data_structs):
@@ -1077,6 +1085,18 @@ def req_7(data_structs, long1, lat1, long2, lat2):
             llave = vert_A +"-"+vert_B
             lt.addLast(lst_secuencia,llave)
         nom_ini_fin = nom_ini
+
+    
+    fini = lt.newList("ARRAY_LIST")
+    for i in lt.iterator(lst_secuencia):
+        vuelos = i.split("-")
+        aero = mp.get(data_structs["mapadistancias"], vuelos[1])["value"]
+        lt.addLast(fini, aero)
+
+    cr7 = mp.get(data_structs["mapadistancias"], nom_ini_fin)["value"]
+
+    tiempo = req_82(fini, cr7)
+
     return rtaa, d_ini, d_fin, tiempo_tot, dist_tot, cant, lst_secuencia, nom_ini_fin
     
     
