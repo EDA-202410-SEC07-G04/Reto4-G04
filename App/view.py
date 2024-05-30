@@ -214,7 +214,7 @@ def print_req_2(control):
     print("Aeropuerto de origen: ", str(info_origen["ICAO"]) ,str( info_origen["NOMBRE"]) , str (info_origen["CIUDAD"]) , str(info_origen["PAIS"]))
     print("Aeropuerto de destino:", str(info_destino["ICAO"]) ,str(info_destino["NOMBRE"]) , str(info_destino["CIUDAD"]) , str(info_destino["PAIS"]))
 
-    for ii in lt.iterator(lista_vert_relacionados):
+    """for ii in lt.iterator(lista_vert_relacionados):
             llave = info_origen["ICAO"] + "-" + info_destino["ICAO"]
             eiu = gr.getEdge(control["aeropuertosHaversine"],info_origen["ICAO"], info_destino["ICAO"])
             valor = mp.get(control["vuelos"], llave)
@@ -223,10 +223,10 @@ def print_req_2(control):
                 #en valor están los encabezados de flights
                 print("       Aeropuerto origen: ", valor2["ORIGEN"])
                 print("       Aeropuerto destino: ", valor2["DESTINO"])
-                """if len(ii) != 1:
-                    print("       Aeropuertos intermedios: ", ii)"""
+                if len(ii) != 1:
+                    print("       Aeropuertos intermedios: ", ii)
                 print("       Tiempo trayecto: ", valor2["TIEMPO_VUELO"])
-                print("----------------------------")
+                print("----------------------------")"""
 
 def print_req_3(control):
     """

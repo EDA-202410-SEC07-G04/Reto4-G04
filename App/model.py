@@ -643,6 +643,11 @@ def distancia_a_aero (data_structs, origen):
         
         if mayor < 30:
             aeropuerto_or = mayor, menor_aero
+            x = ""
+        else: 
+            x = "la distancia es mayor a 30 km"
+            aeropuerto_or = mayor, menor_aero, x
+            
     #print("Aeropuerto or")
     #print(aeropuerto_or)
     return aeropuerto_or
@@ -663,26 +668,35 @@ def req_2(data_structs, origen, destino):
     icao_desti = dist_des_aerof[1]["ICAO"]
     info_destino = dist_des_aerof[1]
 
-    #camino entre los dos aeropuertos
-    recorrido = bfs.BreathFirstSearch(data_structs['aeropuertosHaversine'], icao_orien) #dict
-    recorrido2 = djk.Dijkstra(data_structs['aeropuertosHaversine'], icao_orien)
-    recorrido3 = djk.pathTo(recorrido2, icao_desti) #recorrido entre aeropuertos
-    lista_vert_relacionados = recorrido2["iminpq"]["elements"]
+    if dist_des_aerof[2] == "":
+        #camino entre los dos aeropuertos
+        recorrido = bfs.BreathFirstSearch(data_structs['aeropuertosHaversine'], icao_orien) #dict
+        recorrido2 = djk.Dijkstra(data_structs['aeropuertosHaversine'], icao_orien)
+        recorrido3 = djk.pathTo(recorrido2, icao_desti) #recorrido entre aeropuertos
+        lista_vert_relacionados = recorrido2["iminpq"]["elements"]
 
-    lista = recorrido["visited"]
-    dict_recorrido = lista["table"]
-    lista_recorrido = dict_recorrido["elements"]
+        lista = recorrido["visited"]
+        dict_recorrido = lista["table"]
+        lista_recorrido = dict_recorrido["elements"]
 
-    listi = lt.newList("ARRAY_LIST")
-    if recorrido3["size"] == 1: #si no hay escalas 
-        var = gr.getEdge(data_structs['aeropuertosHaversine'], icao_orien, icao_desti)
-        lt.addLast(listi, var)
-        aeropuertos_visitados = 2
-        distancia_vuelo = var["weight"]
-    else:
-        var = bfs.pathTo(recorrido, icao_desti)
-        lt.addLast(listi, var)
-        aeropuertos_visitados = lt.size(var) 
+        listi = lt.newList("ARRAY_LIST")
+        if recorrido3["size"] == 1: #si no hay escalas 
+            var = gr.getEdge(data_structs['aeropuertosHaversine'], icao_orien, icao_desti)
+            lt.addLast(listi, var)
+            aeropuertos_visitados = 2
+            distancia_vuelo = var["weight"]
+        else:
+            var = bfs.pathTo(recorrido, icao_desti)
+            lt.addLast(listi, var)
+            aeropuertos_visitados = lt.size(var) 
+
+        distancia_total = dist_org_aeroi[0] + dist_des_aerof[0] + distancia_vuelo
+
+    else: 
+        distancia_total = dist_org_aeroi
+        aeropuertos_visitados = "No se realizo el recorrido"
+        recorrido3 = "No se realizo el recorrido"
+        
 
 
     #print(listi)
@@ -690,16 +704,16 @@ def req_2(data_structs, origen, destino):
 
 
 
-    distancia_total = dist_org_aeroi[0] + dist_des_aerof[0] + distancia_vuelo
+    
 
-    #print(recorrido3)
+    """#print(recorrido3)
     fini = lt.newList("ARRAY_LIST")
     for i in lt.iterator(listi):
         aero = mp.get(data_structs["mapadistancias"], i["vertexB"])["value"]
         lt.addLast(fini, aero)
 
     
-    tiempo = req_82(fini, dist_org_aeroi[1])
+    tiempo = req_82(fini, dist_org_aeroi[1])"""
 
     return distancia_total, aeropuertos_visitados, info_origen, info_destino, recorrido3
 
