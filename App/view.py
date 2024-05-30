@@ -254,7 +254,24 @@ def print_req_6(control):
     """
     # TODO: Imprimir el resultado del requerimiento 6
     c_aereo = int(input("Cantidad de aeropuertos: "))
-    r1, r2 = controller.req_6(control, c_aereo)
+    r1, r2, concurrencia_comercial, finali = controller.req_6(control, c_aereo)
+    print("Tiempo: "+ str(r1))
+    print("Aeropuerto mas importante: " + str(r2)+ " cantidad de vuelos saliendo y llegando: "+ str(concurrencia_comercial))
+    for i in lt.iterator(finali):
+        distancia = 0
+        print("--------------------------------")
+        cant = i[0]
+        print("Total aeropuertos del camino: " + str(cant))
+        for x in i[1]:
+            icao_origen = x["vertexA"]
+            icao_destino = x["vertexB"]
+            distancia += x["weight"]
+            print("Vuelo origen: " + str(icao_origen) + ". Vuelo destino: " + str(icao_destino))
+            aero = mp.get(control["mapadistancias"], icao_destino)["value"]
+            print("Aeropuerto: "+ str(aero["ICAO"])+ ", " +str(aero["NOMBRE"]) + ", " + str(aero["CIUDAD"]) + ", " + str(aero["PAIS"]))
+
+        print("Distancia en km: "+ str(distancia))
+
 
 
 def print_req_7(control, long1, lat1, long2, lat2):

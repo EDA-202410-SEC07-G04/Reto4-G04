@@ -157,10 +157,10 @@ def req_6(control, c_aereo):
     """
     # TODO: Modificar el requerimiento 6
     start_time = get_time()
-    r2 = model.req_6(control, c_aereo)
+    r2, concurrencia_comercial, finali = model.req_6(control, c_aereo)
     end_time = get_time()
     r1 = delta_time(start_time, end_time)
-    return r1, r2
+    return r1, r2, concurrencia_comercial, finali
 
 
 def req_7(control, long1, lat1, long2, lat2):
